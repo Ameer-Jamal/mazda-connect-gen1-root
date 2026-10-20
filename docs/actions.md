@@ -26,4 +26,6 @@ The repository name refers to root research. The reviewed JavaScript itself prov
 - Controls: `open()`, `close()`, `terminal()`, `restart()`, `region()`, `enableLogging()`, and `snapshot()`. Actions return false when closed, already running, or unavailable. Failures enter `error`; a later action or close is allowed. Confirmation belongs to the desktop UI, not this controller API.
 - Observations: `onChange(snapshot)` is a synchronous UI callback. Snapshot states are `closed`, `idle`, `running`, `complete`, and `error`; an active operation name, logging flag, and copied log entries accompany the state. Entries are memory-only and capped at 200; no export or telemetry is provided.
 
+The mock adapter also caps its separate call trace at 200 records, so it cannot retain an unbounded duplicate log. This is an observation buffer, not an audit trail.
+
 The controller uses ES5 syntax, checked automatically. The desktop UI uses modern browser APIs such as native dialogs. Syntax compatibility alone does not establish compatibility with a CMU runtime.

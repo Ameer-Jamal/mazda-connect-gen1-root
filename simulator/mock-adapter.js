@@ -8,6 +8,7 @@
             var calls = [];
             function record(name, args) {
                 calls.push({ method: name, args: Array.prototype.slice.call(args) });
+                if (calls.length > 200) { calls.shift(); }
             }
             return {
                 calls: calls,

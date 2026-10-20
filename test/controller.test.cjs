@@ -134,6 +134,7 @@ test('logging is bounded, preserves receiver/arguments and restores functions ac
     assert.equal(controller.snapshot().entries.at(-1).message, '<img src=x onerror=alert(1)>');
     for (let i = 0; i < 220; i++) { adapter.log.warn('entry ' + i); }
     assert.equal(controller.snapshot().entries.length, 200);
+    assert.equal(adapter.calls.length, 200, 'mock trace cannot retain an unbounded duplicate log');
     assert.equal(controller.snapshot().entries.at(-1).message, 'entry 219');
     controller.close();
     assert.deepEqual(adapter.log, originals);
