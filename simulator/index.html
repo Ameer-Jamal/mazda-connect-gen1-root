@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <title>Mazda Connect Gen 1 Root · Offline simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="controller.js"></script>
+  <script defer src="mock-adapter.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a href="./" class="wordmark">CONNECT <span>/ GEN 1 ROOT</span></a>
+    <span class="badge">RESEARCH PREVIEW</span>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow">MAZDA CONNECT GEN 1 ROOT</p>
+      <h1 id="title">Understand every action.<br><span>Before it reaches a car.</span></h1>
+      <p class="lede">Explore the control flow in a desktop sandbox. Every action below goes to an in-memory mock. This preview cannot connect to your infotainment system.</p>
+      <div class="boundary"><strong>OFFLINE SIMULATION ONLY</strong><span>No vehicle connection · No USB access · No installation payload</span></div>
+    </section>
+    <div class="workspace-heading"><h2>Control flow simulator</h2><span>01 / DESKTOP FOUNDATION</span></div>
+    <div id="closed-panel" hidden class="closed-panel">
+      <h3>Overlay closed</h3><p>Pending steps were cancelled and mock logging functions restored. Previously sent commands cannot be undone.</p>
+      <button id="reopen" type="button">Reopen simulator</button>
+    </div>
+    <section id="overlay" class="workspace" aria-label="Simulator overlay">
+      <div class="actions">
+        <div class="panel-title"><span class="dot"></span>Mock controls</div>
+        <button id="terminal" type="button" class="action" aria-labelledby="terminal-label" aria-describedby="terminal-description"><span aria-hidden="true">01</span><span><strong id="terminal-label">Simulate terminal navigation</strong><small id="terminal-description">Three mock events over 14 seconds</small></span><span aria-hidden="true">↗</span></button>
+        <button id="region" type="button" class="action" aria-labelledby="region-label" aria-describedby="region-description"><span aria-hidden="true">02</span><span><strong id="region-label">Simulate UI region: Europe</strong><small id="region-description">Mock UI property change only</small></span><span aria-hidden="true">↗</span></button>
+        <button id="restart" type="button" class="action" aria-labelledby="restart-label" aria-describedby="restart-description"><span aria-hidden="true">03</span><span><strong id="restart-label">Simulate reboot</strong><small id="restart-description">Mock fatal-error display and restart</small></span><span aria-hidden="true">↗</span></button>
+        <button id="logging" type="button" class="action" aria-labelledby="logging-label" aria-describedby="logging-description"><span aria-hidden="true">04</span><span><strong id="logging-label">Enable mock UI logs</strong><small id="logging-description">Bounded to 200 text-only entries</small></span><span aria-hidden="true">+</span></button>
+        <button id="sample" type="button" class="text-button" disabled>Add sample log message</button>
+        <button id="close" type="button" class="close-button">Close overlay <span aria-hidden="true">×</span></button>
+        <p class="fine">Closing cancels future steps. It cannot undo commands already sent.</p>
+      </div>
+      <div class="activity">
+        <div class="activity-heading"><h3>Session activity</h3><span id="state" class="state" role="status" aria-live="polite">Idle</span></div>
+        <p class="activity-note">Mock events show requested calls, not verified vehicle outcomes.</p>
+        <ol id="entries" aria-label="Session log"></ol>
+        <div class="activity-footer"><span>IN-MEMORY MOCK ADAPTER</span><span id="count">0 / 200 entries</span></div>
+      </div>
+    </section>
+    <aside class="qualification"><strong>Desktop tested. Vehicle qualification pending.</strong><p>Gen 2 is unsupported by available evidence. Gen 1 hardware, firmware, and region combinations require separate validation. This simulator provides no compatibility verdict.</p></aside>
+  </main>
+  <footer>Independent community research · Based on mzd-evo/mzd-connect-1-root · Not affiliated with Mazda</footer>
+  <dialog id="confirmation" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+    <form method="dialog">
+      <p class="eyebrow">SIMULATED ACTION</p><h2 id="confirm-title"></h2><p id="confirm-description"></p>
+      <p class="fine">Only an in-memory mock will receive these calls. No vehicle is connected.</p>
+      <div class="dialog-actions"><button value="cancel" autofocus>Cancel</button><button id="confirm-run" value="run">Run simulation</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/mzd-evo/mzd-connect-1-root",
+  "commit": "b1f7a7e082cb88c78183dd94cdb87bd4b02dae60",
+  "algorithm": "sha256",
+  "files": {
+    ".gitignore": "83b148edec3f3dac35ea3753128fe4d48addf53b5b8d69990a41164867ee6a9f",
+    "css/init.css": "42c58aef88326e55c1274fb0069632403bce30a6fa57b71dd4f265c462c2766b",
+    "dev.html": "eeacac4c0a3a79fadf928febca67da108243c4ea0084c267eca3ce1707a1dab6",
+    "js/run.js": "8c25d8e4b59f624dd2d7da2dc7139de5f13b357b30844c1b5e49010da2540c20",
+    "mp3/a.mp3": "8182820ab12dce8aff1f6a828ea4f096f15e4e2a70b20b15359a5e26ae38fa47",
+    "mp3/b.mp3": "a38e031714bd5b640a4dcce23ad3746b04bd528f955275a892be9417fc5e62d4",
+    "mp3/c.mp3": "74b391caad48bef5ac3a8fcd6897776f70a8acacc70df6a362dd350777db352d",
+    "mp3/d.mp3": "09eb90f03c4461ea300db1fb03e9fc4649d1c2b39d62435d1be822811dd2c35c",
+    "mp3title.txt": "7e7f1bfd9bfa902d111223718cc99404d3216c342ae5e56b1fd25a8db19e9a50"
+  }
+}
