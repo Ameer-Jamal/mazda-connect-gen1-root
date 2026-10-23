@@ -4,7 +4,7 @@ This milestone is computer-only research. Submit changes through a pull request;
 
 ## Development
 
-Use Node.js 22+, run `npm ci`, then `npm run preview`. Only simulator assets are served at `http://127.0.0.1:4173`. There is no build step and no external runtime dependency. `npm ci` and the optional browser download require network access; the preview does not.
+Use Node.js 22+ and Python 3.9+ for package tests/builds, run `npm ci`, then `npm run preview`. Only guided-setup and simulator assets are served at `http://127.0.0.1:4173`. There is no build step and no external runtime dependency. `npm ci` and the optional browser download require network access; the preview does not.
 
 The inherited `.gitignore` is pinned unchanged. To keep local dependencies out of Git status, add `node_modules/` to your clone's `.git/info/exclude`. Do not commit dependencies or browser caches.
 
@@ -13,6 +13,7 @@ Before submitting:
 ```sh
 npm run check:upstream
 npm test
+npm run test:package
 npx playwright install chromium
 npm run test:browser
 npm run test:upstream
@@ -36,3 +37,7 @@ The upstream characterization suite executes only the pinned script in fresh bro
 For desktop bugs, provide the commit, browser, steps, expected behavior, and observed result. For vehicle reports, use the [compatibility evidence requirements](docs/compatibility.md). Omit VINs, personal accounts, location history, and secrets. Label third-party reports and untested hypotheses explicitly.
 
 No license file was found in the reviewed upstream commit. Preserve attribution and do not add a license purporting to cover upstream work without resolving its provenance and permissions. Licensing clarification is pending; this contribution guide is not a license grant.
+
+## Desktop prerelease packaging
+
+See [the desktop release scope](docs/desktop-release.md). The archive allowlist excludes inherited payloads and AIO executables. Build from clean tracked files with `npm run build:desktop -- /absolute/path/to/new/output-folder`; exact Git objects are read, not arbitrary working files. The four available setup steps end at a JSON plan. Do not label a plan download or rehearsal as USB preparation or vehicle installation.

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <title>Mazda Connect Gen 1 Root · Guided desktop alpha</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="setup.css">
+  <script defer src="aio-catalog.js"></script>
+  <script defer src="setup-model.js"></script>
+  <script defer src="setup.js"></script>
+</head>
+<body>
+  <header class="masthead"><a class="wordmark" href="index.html">CONNECT <span>/ GEN 1 ROOT</span></a><span class="badge">DESKTOP ALPHA · 0.2.0</span></header>
+  <main class="setup-main">
+    <section class="intro">
+      <p class="eyebrow">GUIDED SETUP · MAZDA CONNECT GEN 1</p>
+      <h1>Your choices.<br><span>One step at a time.</span></h1>
+      <p class="lede">Identify your system, explore AIO tweaks, and save a review plan. The finished installer will prepare a USB and guide the in-car steps. Those two stages are not available in this alpha.</p>
+      <div class="boundary"><strong>DESKTOP PLANNING ONLY</strong><span>No USB access · No formatting · No installation files · No connection to a car</span></div>
+    </section>
+    <nav aria-label="Setup progress"><ol class="setup-progress">
+      <li data-step="0">1 <span>Identify</span></li><li data-step="1">2 <span>Choose</span></li><li data-step="2">3 <span>Review</span></li><li data-step="3">4 <span>Save plan</span></li><li class="locked">5 <span>USB · unavailable</span></li><li class="locked">6 <span>Car · unavailable</span></li>
+    </ol></nav>
+    <p id="setup-message" role="status" aria-live="polite" aria-label="Setup status"></p>
+    <div class="setup-panel">
+      <section data-panel="0" aria-labelledby="identify-title">
+        <p class="eyebrow">STEP 1 OF 4 AVAILABLE STEPS</p><h2 id="identify-title" tabindex="-1">Which system do you have?</h2>
+        <p>Copy the details from your infotainment system's information screen. You can leave unknown details blank and plan now; they will be needed before a vehicle package can be qualified.</p>
+        <form id="setup-target" autocomplete="off">
+          <div class="setup-fields">
+            <div><label for="setup-generation">Infotainment generation</label><select id="setup-generation"><option value="unknown">Not sure yet</option><option value="gen1">Gen 1 / MZD Connect</option><option value="gen2">Gen 2</option></select></div>
+            <label>Model and trim<input id="setup-model" maxlength="128" placeholder="For example: MX-5 Miata GT"></label>
+            <label>Model year<input id="setup-year" inputmode="numeric" maxlength="4" placeholder="For example: 2022"></label>
+            <label>Full OS version<input id="setup-firmware" maxlength="128" placeholder="Copy the entire displayed version"></label>
+            <label>Firmware region<input id="setup-region" maxlength="128" placeholder="Copy it if shown; do not guess"></label>
+            <label>Vehicle market<input id="setup-market" maxlength="128" placeholder="Where the vehicle was sold"></label>
+          </div>
+        </form>
+        <details><summary>What if I don't know the generation?</summary><p>Model year and screen size alone do not prove the generation or compatibility. Leave “Not sure yet” selected. Gen 2 is unsupported by the evidence reviewed here. Do not remove any hardware to complete this form.</p></details>
+        <p class="fine">Everything stays in this page until you explicitly export. No VIN, account, hardware removal or USB insertion is needed. Reloading clears the session.</p>
+      </section>
+      <section data-panel="1" aria-labelledby="choose-title" hidden>
+        <p class="eyebrow">STEP 2 OF 4 AVAILABLE STEPS</p><h2 id="choose-title" tabindex="-1">What would you like to change?</h2>
+        <p>Choose ideas for your review plan. These are indexed AIO features, not a list of tweaks qualified for your car. No feature is selected by default.</p>
+        <div class="aio-filters"><label>Find a tweak<input id="setup-search" type="search" maxlength="128" placeholder="Try background, album art, speedometer…"></label><div><label for="setup-category">Tweak category</label><select id="setup-category"><option value="all">All categories</option><option>Appearance</option><option>Audio</option><option>Navigation</option><option>Apps</option><option>System</option><option>Restrictions</option></select></div></div>
+        <p id="setup-results" role="status" aria-label="Tweak results"></p><p id="setup-count" role="status" aria-label="Selected tweaks"></p>
+        <div id="setup-features" class="aio-grid"></div>
+      </section>
+      <section data-panel="2" aria-labelledby="review-title" hidden>
+        <p class="eyebrow">STEP 3 OF 4 AVAILABLE STEPS</p><h2 id="review-title" tabindex="-1">Review what you picked.</h2>
+        <dl id="setup-summary" class="setup-summary"></dl>
+        <p id="setup-finding" class="setup-finding"></p>
+        <ul id="setup-selected" class="setup-selected"></ul>
+        <p>This preview has not checked all dependencies, conflicts or restoration paths. The community Android Auto app is separate from Mazda's factory Android Auto / CarPlay. Hiding artwork is separate from stopping Gracenote.</p>
+        <label class="setup-ack"><input id="setup-ack" type="checkbox">I understand the download is a review plan, not software to put in the car.</label>
+      </section>
+      <section data-panel="3" aria-labelledby="save-title" hidden>
+        <p class="eyebrow">STEP 4 OF 4 AVAILABLE STEPS</p><h2 id="save-title" tabindex="-1">Save your review plan.</h2>
+        <p>The JSON file records selected feature descriptions, source references, generation and the firmware string you entered. It excludes model, year, region and market. It contains no installer or executable scripts.</p>
+        <button id="setup-download" type="button" class="primary">Download review plan (.json)</button>
+        <p class="fine">Save it on your computer. This preview cannot format or write a USB, and the download does not make a vehicle installation package.</p>
+      </section>
+      <section data-panel="4" aria-labelledby="remaining-title" hidden>
+        <p class="eyebrow">REMAINING INSTALLER STAGES</p><h2 id="remaining-title" tabindex="-1">Your plan is the current stopping point.</h2>
+        <div class="remaining-stage"><h3>5 · Prepare the USB</h3><strong>Unavailable</strong><p>The planned installer will identify a selected removable drive, confirm before erasing it, assemble qualified feature packages and verify the copied files. This alpha does none of those operations.</p></div>
+        <div class="remaining-stage"><h3>6 · Follow the in-car guide</h3><strong>Unavailable</strong><p>Instructions must match an exact, bench-qualified package and include expected results and recovery steps. No configuration has been qualified here, so this release provides no installation procedure.</p></div>
+        <p>You can return to edit your selections or explore the desktop research tools. The selected plan and a successful desktop test do not establish vehicle compatibility.</p>
+      </section>
+      <div class="setup-controls"><button id="setup-back" type="button">Back</button><button id="setup-next" type="button" class="primary">Continue</button></div>
+    </div>
+    <aside class="setup-about"><h2>Source and research tools</h2><p>Features are indexed from a pinned Trevelopment/MZD-AIO snapshot. We preserve the original root project's vehicle files unchanged in source control; none are included in the desktop download.</p><p><a href="research.html">Open the AIO workbench and mock simulator</a> · <a href="https://github.com/Ameer-Jamal/mazda-connect-gen1-root" target="_blank" rel="noopener noreferrer">Project source and evidence</a></p><p class="fine">No analytics, automatic updates, remote APIs, or saved browser state. External source links open only when you follow them. Current desktop browsers are required.</p></aside>
+  </main>
+  <noscript><p>This desktop preview needs JavaScript enabled. It cannot access your vehicle or USB.</p></noscript>
+  <footer>Independent community research · Not affiliated with Mazda · Desktop alpha, not a vehicle-ready release</footer>
+</body>
+</html>

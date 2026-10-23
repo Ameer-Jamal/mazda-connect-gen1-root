@@ -1,0 +1,27 @@
+Independent community research; not affiliated with or endorsed by Mazda.
+
+This desktop archive contains only the new desktop UI, planning model,
+source index, mock controller, styles and these notices. It excludes the
+original vehicle-facing JS, CSS, HTML and MP3 files retained in source
+control. No license is assigned here to that upstream material; no license
+file was found at the reviewed upstream commit.
+
+Original access research:
+https://github.com/mzd-evo/mzd-connect-1-root
+Pinned commit: b1f7a7e082cb88c78183dd94cdb87bd4b02dae60
+
+AIO feature references credit Trevor Martin / Trevelopment and the AIO
+community. MZD-AIO's project notice states GPL version 3 or later. This
+archive includes independently written metadata and links, not AIO scripts,
+fonts, images, libraries or installer binaries. Component redistribution
+review remains pending before an executable integration.
+https://github.com/Trevelopment/MZD-AIO
+Pinned source commit: 409c724ed860497b2a34f9367cb4a019287846ea
+
+The original root project's attribution and AIO's separate license terms
+must not be treated as a license grant over the entire combined repository.
+This preview does not resolve that question or grant rights in Mazda's
+firmware. Release source is identified in release-info.json.
+
+No external runtime dependencies are bundled. The development/test tools
+listed in the source package.json are not part of this desktop archive.

@@ -1,6 +1,6 @@
 # Mazda Connect Gen 1 Root
 
-**Understand every action before it reaches a car.**
+**Guided desktop alpha — plan your Mazda Connect customization one step at a time.**
 
 Independent community research into first-generation **Mazda Connect / MZD Connect**, based on [mzd-evo/mzd-connect-1-root](https://github.com/mzd-evo/mzd-connect-1-root).
 
@@ -10,6 +10,7 @@ Independent community research into first-generation **Mazda Connect / MZD Conne
 
 ## What this fork adds
 
+- A beginner-oriented four-step desktop flow: identify, choose tweaks, review, and save a plan. USB preparation and in-car installation are explicitly unavailable.
 - A standalone, clearly labeled **offline simulator**, with an explicit in-memory mock adapter and no vehicle connection.
 - Tested control logic: one operation at a time, bounded text-only logs, capability checks, error reporting, and cancellation of pending steps on close.
 - An [action reference](docs/actions.md), [compatibility evidence](docs/compatibility.md), and [safety findings](docs/safety-findings.md).
@@ -20,7 +21,13 @@ Independent community research into first-generation **Mazda Connect / MZD Conne
 
 These improvements apply to the **new simulator only**. The inherited vehicle-facing code remains unchanged and retains its documented problems. Neither a passing test nor an integrity check establishes that a vehicle operation is safe.
 
-## Preview on your computer
+## Download the desktop alpha
+
+The [desktop-v0.2.0-alpha.1 prerelease](https://github.com/Ameer-Jamal/mazda-connect-gen1-root/releases/tag/desktop-v0.2.0-alpha.1) contains an offline desktop ZIP. Extract it and open `index.html` in a current desktop browser; no Node.js, server or account is required. Automated browser checks use Chromium. **This is a planning tool, not USB installation software. Do not put the download in your car.** Use the named desktop ZIP asset, not GitHub's automatic Source code archives (which contain the experimental inherited vehicle files). Only the new desktop files are included in the desktop asset; the original vehicle payloads and AIO executables are excluded. See [release scope, verification and remaining installer work](docs/desktop-release.md).
+
+![Guided identification step](docs/screenshots/setup-identify.png)
+
+## Preview from source
 
 Requires Node.js 22 or newer and npm. After cloning this fork, run these commands in its directory:
 
@@ -29,13 +36,13 @@ npm ci
 npm run preview
 ```
 
-Open **http://127.0.0.1:4173** in a current desktop browser. Stop the server with Ctrl+C. The server listens only on your computer's loopback interface, serves an explicit list of simulator assets, and does not serve the inherited payload files. There are no external fonts, analytics, remote APIs, or installation steps for a vehicle.
+Open **http://127.0.0.1:4173** for guided setup, or **http://127.0.0.1:4173/research.html** for the advanced workbench and mock simulator. Stop the server with Ctrl+C. The server listens only on your computer's loopback interface, serves an explicit list of simulator assets, and does not serve the inherited payload files. There are no external fonts, analytics, remote APIs, or installation steps for a vehicle.
 
 The preview itself works without an internet connection after dependencies are installed. Its native confirmation dialog requires a current desktop browser; this UI is not designed for the vehicle browser.
 
 ### Explore AIO customization
 
-Scroll to **AIO workbench**. Search for backgrounds, album art, audio behavior, speedometer or Android Auto; select features and export a JSON review plan. Filters preserve your choices. Source links point to a pinned Trevelopment/MZD-AIO snapshot. Firmware findings explain source limits, including the community video's firmware-74 bypass. Every export is metadata only, with vehicle execution unavailable. The catalog is a first integration slice, not all AIO options or a compiled installer. See the [source review and remaining integration work](docs/aio-integration.md).
+Open the research-tools link, then scroll to **AIO workbench**. Search for backgrounds, album art, audio behavior, speedometer or Android Auto; select features and export a JSON review plan. Filters preserve your choices. Source links point to a pinned Trevelopment/MZD-AIO snapshot. Firmware findings explain source limits, including the community video's firmware-74 bypass. Every export is metadata only, with vehicle execution unavailable. The catalog is a first integration slice, not all AIO options or a compiled installer. See the [source review and remaining integration work](docs/aio-integration.md).
 
 ![AIO workbench](docs/screenshots/aio-workbench.png)
 
@@ -69,6 +76,7 @@ ND2 identifies a Miata revision, not infotainment generation. Identifying Gen 1 
 ```sh
 npm run check:upstream
 npm test
+npm run test:package
 npx playwright install chromium
 npm run test:browser
 npm run test:upstream

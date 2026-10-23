@@ -18,7 +18,18 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check:upstream
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: npm test
+      - run: npm run test:package
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: npm run test:upstream
+      - run: npm run build:desktop -- "$RUNNER_TEMP/mazda-desktop"
+      - run: DESKTOP_ARCHIVE="$RUNNER_TEMP/mazda-desktop/mazda-connect-desktop-0.2.0-alpha.1.zip" node --test --test-name-pattern="extracted archive" test/setup-browser.test.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offline-desktop-alpha
+          path: ${{ runner.temp }}/mazda-desktop/*
+          if-no-files-found: error

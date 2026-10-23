@@ -40,7 +40,7 @@ async function pageFor(t, viewport = { width: 1280, height: 1100 }) {
       }
     });
   });
-  await page.goto(base);
+  await page.goto(base + '/research.html');
   await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Idle' }).waitFor();
   t.after(() => {
     assert.deepEqual(errors, [], 'no uncaught browser errors');
