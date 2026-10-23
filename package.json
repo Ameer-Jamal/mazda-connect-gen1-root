@@ -1,14 +1,16 @@
 {
   "name": "mazda-connect-gen1-root-research",
-  "version": "0.1.0-dev",
+  "version": "0.2.0-alpha.1",
   "private": true,
-  "description": "Offline research simulator; no vehicle-ready release",
+  "description": "Offline guided desktop alpha; vehicle installation unavailable",
   "scripts": {
     "preview": "node tools/preview.cjs",
-    "test": "node --test test/aio-catalog.test.cjs test/capabilities.test.cjs test/controller.test.cjs test/controller-faults.test.cjs test/integrity.test.cjs test/syntax.test.cjs",
-    "test:browser": "node --test test/browser.test.cjs",
+    "test": "node --test test/setup-model.test.cjs test/aio-catalog.test.cjs test/capabilities.test.cjs test/controller.test.cjs test/controller-faults.test.cjs test/integrity.test.cjs test/syntax.test.cjs",
+    "test:browser": "node --test test/browser.test.cjs test/setup-browser.test.cjs",
     "test:upstream": "node --test test/upstream.test.cjs",
-    "check:upstream": "node tools/check-upstream.cjs"
+    "check:upstream": "node tools/check-upstream.cjs",
+    "test:package": "python3 -B -m unittest discover -s test -p \"test_*.py\"",
+    "build:desktop": "python3 -B tools/build-desktop.py"
   },
   "engines": {
     "node": ">=22"

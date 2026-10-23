@@ -1,0 +1,36 @@
+MAZDA CONNECT GEN 1 ROOT — DESKTOP ALPHA
+
+THIS DOWNLOAD IS NOT A VEHICLE INSTALLER. DO NOT PUT IT IN YOUR CAR.
+It cannot prepare, format, write or discover a USB drive.
+
+1. Extract this entire ZIP into a folder on your computer.
+2. Open index.html in a current desktop browser. Automated checks use Chromium;
+   Firefox and Safari have not been verified.
+3. Follow Identify > Choose > Review > Save plan.
+4. Save the JSON review plan on your computer if you want to keep it.
+
+No Node.js, installation, server, account or internet connection is required
+for the extracted desktop preview. External source links require internet
+only when you follow them. Keep all extracted files together.
+
+Unknown car details can stay blank. Do not guess the firmware or region.
+No vehicle configuration is qualified in this alpha. USB preparation and
+in-car installation are explicitly unavailable. There are no car scripts,
+MP3 payloads, drive tools, firmware updates or vehicle instructions here.
+
+The research tools link opens the AIO workbench and an in-memory mock
+simulator. Mock terminal/reboot/region events do not reach a vehicle.
+
+Data stays in page memory. Reloading clears the session. Explicit plan
+export includes chosen feature metadata, generation and the entered firmware
+string; it excludes the other target-identification fields. A download
+request is not proof that your browser saved the file; check Downloads.
+
+manifest.json records SHA-256 hashes of the extracted application files.
+The separate SHA256SUMS.txt verifies the ZIP downloaded from GitHub.
+
+Source and reports:
+https://github.com/Ameer-Jamal/mazda-connect-gen1-root
+
+A source link or community report is not a vehicle qualification result.
+No claim of zero bugs or vehicle safety is made.
