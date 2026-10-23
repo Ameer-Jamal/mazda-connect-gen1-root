@@ -15,6 +15,7 @@ npm run check:upstream
 npm test
 npx playwright install chromium
 npm run test:browser
+npm run test:upstream
 ```
 
 On Linux, use `npx playwright install --with-deps chromium` if system libraries are missing. CI checks out full history for the baseline check. Keep new browser scripts in ES5 syntax; the syntax test enforces it. Desktop dialogs and CSS still require modern browsers, and no vehicle-runtime compatibility is asserted.
@@ -26,6 +27,8 @@ On Linux, use `npx playwright install --with-deps chromium` if system libraries 
 - Preserve the nine upstream files byte-for-byte. Do not regenerate the baseline to accept a change. Any future payload modification requires an explicit separate review and hardware qualification plan.
 
 Use fake adapters and deterministic time in controller tests. Browser tests must verify actual DOM text, dialogs, keyboard/focus behavior, cancellation, and reopening. A passing mock test cannot be cited as vehicle qualification. For screenshots, run `SCREENSHOT_DIR=docs/screenshots npm run test:browser` and visually inspect the resulting images before committing them.
+
+The upstream characterization suite executes only the pinned script in fresh browser contexts with mocked host APIs and blocked network requests. `LEGACY BUG` assertions intentionally reproduce defects. Keep those separate from the new-controller regression tests; do not present their success as vehicle safety evidence. Extend the [upstream review](docs/upstream-review.md) when adding or resolving a finding.
 
 ## Reports and evidence
 

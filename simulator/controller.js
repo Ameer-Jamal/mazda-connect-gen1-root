@@ -19,6 +19,7 @@
         var generation = 0;
         var originals = null;
         var logger = null;
+        var wrappers = null;
         var levels = ['error', 'warn', 'info'];
 
         function snapshot() {
@@ -32,25 +33,50 @@
             };
         }
 
-        function notify() { onChange(snapshot()); }
+        function printable(message) {
+            var value;
+            try { value = String(message); } catch (ignored) { value = '[unprintable message]'; }
+            return value.length > 4096 ? value.slice(0, 4082) + ' [truncated]' : value;
+        }
+
+        function errorText(error) {
+            try { return error && error.message ? printable(error.message) : printable(error); }
+            catch (ignored) { return '[unprintable error]'; }
+        }
+
+        function notify() {
+            try { onChange(snapshot()); }
+            catch (error) {
+                generation += 1;
+                cancelTimers();
+                if (state !== 'closed') { state = 'error'; }
+                operation = null;
+                restoreLogging();
+                append('error', 'Observer failed; operation stopped: ' + errorText(error));
+                // Do not recursively call the failing observer.
+            }
+        }
 
         function append(level, message) {
-            entries.push({ level: level, message: String(message) });
+            entries.push({ level: level, message: printable(message) });
             if (entries.length > 200) { entries.shift(); }
         }
 
         function cancelTimers() {
             var pending = timers;
             timers = [];
-            pending.forEach(function (id) { scheduler.clearTimeout(id); });
+            pending.forEach(function (id) {
+                try { scheduler.clearTimeout(id); }
+                catch (error) { append('warn', 'Timer cancellation failed; session invalidation still blocks its callback: ' + errorText(error)); }
+            });
         }
 
         function fail(error) {
             generation += 1;
             cancelTimers();
-            state = 'error';
+            if (state !== 'closed') { state = 'error'; }
             operation = null;
-            append('error', error && error.message ? error.message : String(error));
+            append('error', errorText(error));
             notify();
             return false;
         }
@@ -87,6 +113,7 @@
                         notify();
                     } else {
                         notify();
+                        if (session !== generation || state !== 'running') { return; }
                         timers.push(scheduler.setTimeout(function () { next(index + 1); }, 7000));
                     }
                 } catch (error) { fail(error); }
@@ -97,9 +124,27 @@
 
         function restoreLogging() {
             if (originals) {
-                levels.forEach(function (level) { logger[level] = originals[level]; });
+                var target = logger;
+                var saved = originals;
+                var owned = wrappers;
+                // Deactivate capture even if an external owner made a method non-writable.
                 originals = null;
                 logger = null;
+                wrappers = null;
+                levels.forEach(function (level) {
+                    var descriptor;
+                    if (!owned[level]) { return; }
+                    try {
+                        descriptor = Object.getOwnPropertyDescriptor(target, level);
+                        if (!descriptor || descriptor.value !== owned[level]) {
+                            append('warn', 'Preserved external logging change: ' + level);
+                            return;
+                        }
+                        target[level] = saved[level];
+                    } catch (error) {
+                        append('warn', 'Could not restore mock logger ' + level + '; capture disabled, original forwarding retained: ' + errorText(error));
+                    }
+                });
             }
         }
 
@@ -116,11 +161,11 @@
             close: function () {
                 if (state === 'closed') { return false; }
                 generation += 1;
+                state = 'closed';
                 cancelTimers();
                 restoreLogging();
                 operation = null;
-                state = 'closed';
-                append('warn', 'Overlay closed; pending steps cancelled. Commands already sent cannot be undone.');
+                append('warn', 'Overlay closed; pending steps invalidated. Commands already sent cannot be undone.');
                 notify();
                 return true;
             },
@@ -152,29 +197,40 @@
                 ]);
             },
             enableLogging: function () {
+                var candidate;
+                var saved = {};
                 if (state === 'closed' || state === 'running' || originals) { return false; }
                 try {
-                    logger = adapter && adapter.log;
+                    candidate = adapter && adapter.log;
                     levels.forEach(function (level) {
-                        if (!logger || typeof logger[level] !== 'function') {
-                            throw new Error('Mock logger unavailable: ' + level);
+                        var descriptor = candidate && Object.getOwnPropertyDescriptor(candidate, level);
+                        if (!descriptor || typeof descriptor.value !== 'function' || !descriptor.writable) {
+                            throw new Error('Mock logger unavailable or not an own writable function: ' + level);
                         }
+                        saved[level] = descriptor.value;
                     });
-                    originals = { error: logger.error, warn: logger.warn, info: logger.info };
+                    logger = candidate;
+                    originals = saved;
+                    wrappers = {};
                     levels.forEach(function (level) {
                         var original = originals[level];
                         var target = logger;
                         var wrapped = function (message) {
-                            if (state === 'closed' || !originals || logger !== target || target[level] !== wrapped) { return; }
-                            append(level, message);
-                            notify();
+                            var descriptor = Object.getOwnPropertyDescriptor(target, level);
+                            if (!descriptor || descriptor.value !== wrapped) { return; }
+                            if (state !== 'closed' && originals === saved && logger === target) {
+                                append(level, message);
+                                notify();
+                            }
+                            // If restoration was externally blocked, forwarding remains usable.
                             return original.apply(target, arguments);
                         };
+                        wrappers[level] = wrapped;
                         logger[level] = wrapped;
                     });
                     append('info', 'Mock UI logs enabled. Original functions will be restored on close.');
                     notify();
-                    return true;
+                    return state !== 'error';
                 } catch (error) {
                     restoreLogging();
                     return fail(error);

@@ -25,9 +25,10 @@ npm run check:upstream
 npm test
 npx playwright install chromium
 npm run test:browser
+npm run test:upstream
 ```
 
-The suite contains 18 controller/integrity/syntax tests and 8 browser/server tests. Browser time is controlled for sequence checks; manual in-app inspection also observed normal timed completion. No vehicle APIs, USB devices, media players, or inherited loader scripts were exercised.
+At the 2026-10-20 foundation baseline, the suite contained 18 controller/integrity/syntax tests and 8 browser/server tests. Browser time was controlled for sequence checks; manual in-app inspection also observed normal timed completion. That baseline did not exercise the inherited script. The separate mocked-source characterization added below does; neither suite uses a real vehicle API or loads the MP3s.
 
 ## Visual and keyboard inspection
 
@@ -40,3 +41,17 @@ In the live in-app preview, opened terminal confirmation, used Tab and Enter to 
 This record establishes desktop behavior only. No car or spare CMU has been tested. The owner's 2022 MX-5 GT firmware and market remain unconfirmed. Vehicle compatibility, diagnostic consequences, persistence, power-loss behavior, and recovery remain unverified. The unchanged upstream payload retains its known limitations; simulator improvements are not connected to it.
 
 GitHub CI status is attached to the PR commit and should be checked there. Screenshots are illustrations, not vehicle test evidence. No installable release is produced.
+
+## Follow-up validation: 2026-10-23
+
+Local environment: macOS ARM64, Node.js 26.3.0, Playwright 1.62.1 / Chromium. CI targets Node.js 22 on Ubuntu. All nine inherited files still match the upstream baseline.
+
+| Suite | Checks | Meaning |
+| --- | --- | --- |
+| `npm test` | 31 | Controller, injected faults, upstream integrity, and ES5 syntax |
+| `npm run test:browser` | 9 | Desktop UI plus preview-server boundaries and malformed-target handling |
+| `npm run test:upstream` | 8 | Seven intentionally reproduced legacy defects plus one Destroy behavior characterization; **not** evidence that legacy code is fixed |
+
+All 48 checks pass locally. Ten newly added fault scenarios failed against our foundation controller before correction; thirteen fault tests now cover those failures and additional cleanup/forwarding cases. See [the upstream review](upstream-review.md) for the case mapping and [architecture](architecture.md) for primary-source research.
+
+The upstream suite uses fresh isolated Chromium contexts, blocks network requests, and supplies only in-memory framework/log/CSS stubs. It runs the pinned legacy script with both host-style and head-loaded dev environments. No downstream diagnostic implementation, vehicle hardware, media loader, real reboot, or persistent configuration is exercised. The previous manual keyboard/visual review remains dated 2026-10-20; this follow-up verifies UI flows through automated browser tests.
