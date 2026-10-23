@@ -14,6 +14,7 @@ Independent community research into first-generation **Mazda Connect / MZD Conne
 - Tested control logic: one operation at a time, bounded text-only logs, capability checks, error reporting, and cancellation of pending steps on close.
 - An [action reference](docs/actions.md), [compatibility evidence](docs/compatibility.md), and [safety findings](docs/safety-findings.md).
 - Automated desktop tests and a SHA-256 integrity check against a pinned upstream commit.
+- An [upstream report and regression review](docs/upstream-review.md) and [source-linked architecture analysis](docs/architecture.md), with tests that reproduce seven legacy defects in the actual inherited script.
 
 These improvements apply to the **new simulator only**. The inherited vehicle-facing code remains unchanged and retains its documented problems. Neither a passing test nor an integrity check establishes that a vehicle operation is safe.
 
@@ -60,9 +61,10 @@ npm run check:upstream
 npm test
 npx playwright install chromium
 npm run test:browser
+npm run test:upstream
 ```
 
-CI runs the integrity check, controller/integrity/ES5 syntax tests, and Chromium tests. Browser installation on Linux CI also installs system dependencies. Read [CONTRIBUTING.md](CONTRIBUTING.md) for boundaries and test expectations.
+CI runs the integrity check, controller/integrity/ES5 syntax tests, Chromium UI tests, and an isolated upstream characterization suite. A passing `LEGACY BUG` test means a known upstream defect was reproduced, not fixed in the inherited payload. Browser installation on Linux CI also installs system dependencies. Read [CONTRIBUTING.md](CONTRIBUTING.md) for boundaries and test expectations.
 
 The upstream baseline is commit [`b1f7a7e082cb88c78183dd94cdb87bd4b02dae60`](https://github.com/mzd-evo/mzd-connect-1-root/commit/b1f7a7e082cb88c78183dd94cdb87bd4b02dae60). The checker validates all nine inherited files against both recorded hashes and that Git commit. It requires Git history containing the commit; use a normal clone or CI's full-history checkout. Source ZIP downloads do not provide that history.
 

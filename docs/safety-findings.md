@@ -15,6 +15,12 @@ Reviewed baseline: `b1f7a7e082cb88c78183dd94cdb87bd4b02dae60`, on 2026-10-20. Fi
 | Ambiguous control labels and immediate disruption | “Destroy” removes UI; restart and region change have no confirmation | Users can misunderstand effects or trigger actions accidentally | Plain-language labels, explanations, native confirmation dialogs |
 | Media with active metadata | Four MP3 titles contain an HTML loader pointing to mount-specific script paths | Treating them as ordinary audio may activate code on a susceptible host | Clearly disclosed; preview server rejects media and legacy script paths |
 
+## Follow-up: 2026-10-23
+
+The [upstream review](upstream-review.md) covers all seven Discussions and the sole PR, reproduces seven source defects in an isolated actual-script harness, and maps each to regression coverage for the separate controller/UI. The [architecture analysis](architecture.md) adds primary manufacturer, technical, and security-research sources. Display-failure causes remain unresolved.
+
+Fault injection also found weaknesses in our own step-1 controller. The new code rejects loggers it cannot patch safely, preserves other components' replacements, continues cleanup when an individual method or timer cannot be restored/cancelled, retains original log forwarding, bounds message length, and stops progression on observer failure. A late exception cannot revive a closed session. Warnings report incomplete cleanup rather than claiming unconditional restoration. These protections remain disconnected from the inherited payload.
+
 ## Incident reports: evidence, not established causes
 
 - [Discussion #7: no image, sound remains](https://github.com/mzd-evo/mzd-connect-1-root/discussions/7) describes losing display output after following a video. Another user reports the same problem. Firmware, exact actions, and a verified recovery are absent in the reviewed comments.

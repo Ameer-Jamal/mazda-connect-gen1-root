@@ -13,11 +13,13 @@ const files = {
 };
 function createServer() {
   return http.createServer((request, response) => {
-    const pathname = new URL(request.url, 'http://localhost').pathname;
-    const asset = Object.hasOwn(files, pathname) ? files[pathname] : null;
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'");
+    let pathname;
+    try { pathname = new URL(request.url, 'http://localhost').pathname; }
+    catch { response.writeHead(400).end('Invalid request target'); return; }
+    const asset = Object.hasOwn(files, pathname) ? files[pathname] : null;
     if (!asset || !['GET', 'HEAD'].includes(request.method)) {
       response.writeHead(404).end('Not found'); return;
     }

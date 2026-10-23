@@ -3,6 +3,7 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const http = require('node:http');
 const { chromium } = require('playwright');
 const { createServer } = require('../tools/preview.cjs');
 let browser, server, base;
@@ -186,4 +187,15 @@ test('preview server never serves inherited files, traversal, or repository cont
   }
   assert.equal((await fetch(base, { method: 'POST' })).status, 404);
   assert.equal((await fetch(base, { method: 'HEAD' })).status, 200);
+});
+
+test('malformed HTTP request target returns 400 and the preview remains available', async () => {
+  const status = await new Promise((resolve, reject) => {
+    const request = http.request({ hostname: '127.0.0.1', port: server.address().port, path: 'http://[bad', method: 'GET' }, response => {
+      response.resume(); response.on('end', () => resolve(response.statusCode));
+    });
+    request.on('error', reject); request.end();
+  });
+  assert.equal(status, 400);
+  assert.equal((await fetch(base)).status, 200);
 });
