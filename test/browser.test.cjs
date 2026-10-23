@@ -232,3 +232,69 @@ test('Gen 2 assessment explains unsupported status without blocking the independ
   assert.equal(await page.getByText('Vehicle: unavailable', { exact: true }).count(), 4);
   assert.equal((await calls(page)).length, 0);
 });
+
+test('AIO workbench retains filtered selections, supports keyboard and exports only a review plan', async t => {
+  const page = await pageFor(t);
+  const search = page.getByRole('searchbox', { name: 'Search tweaks' });
+  const chooseBackground = page.getByRole('checkbox', { name: 'Background image', exact: true });
+  await chooseBackground.focus();
+  await page.keyboard.press('Space');
+  await search.fill('Gracenote');
+  const gracenote = page.getByRole('checkbox', { name: 'Disable Gracenote process', exact: true });
+  await gracenote.check();
+  await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('Appearance');
+  assert.equal(await gracenote.count(), 0);
+  await search.fill('');
+  assert.equal(await chooseBackground.isChecked(), true);
+  assert.match(await page.getByRole('status', { name: 'AIO selection' }).innerText(), /2 selected/);
+  await page.getByRole('textbox', { name: 'Full OS / firmware string' }).fill('74.00.324A EU N');
+  await page.getByRole('combobox', { name: 'Infotainment generation' }).selectOption('gen1');
+  assert.match(await page.locator('#aio-firmware').innerText(), /bypass, not qualification/);
+  const downloadEvent = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export review plan (.json)' }).click();
+  const download = await downloadEvent;
+  assert.equal(download.suggestedFilename(), 'aio-research-plan.json');
+  const plan = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
+  assert.equal(plan.executable, false);
+  assert.equal(plan.vehicleAllowed, false);
+  assert.equal(plan.firmware, '74.00.324A EU N');
+  assert.deepEqual(plan.features.map(f => f.id), ['background', 'gracenote']);
+  assert.deepEqual(await calls(page), []);
+  await page.getByRole('button', { name: 'Clear selection' }).click();
+  assert.equal(await page.getByRole('button', { name: 'Export review plan (.json)' }).isDisabled(), true);
+  assert.equal(await search.evaluate(el => el === document.activeElement), true);
+});
+
+test('AIO search is literal, narrow layout fits, Gen 2 remains unsupported and source links are pinned', async t => {
+  const page = await pageFor(t, { width: 390, height: 844 });
+  const search = page.getByRole('searchbox', { name: 'Search tweaks' });
+  await search.fill('<img src=x onerror=alert(1)>');
+  assert.match(await page.getByRole('status', { name: 'AIO search results' }).innerText(), /^0 of/);
+  assert.equal(await page.locator('#aio-features img').count(), 0);
+  await search.fill('Community Android Auto');
+  await page.getByRole('checkbox', { name: 'Community Android Auto', exact: true }).check();
+  await page.getByRole('combobox', { name: 'Infotainment generation' }).selectOption('gen2');
+  assert.match(await page.locator('#aio-firmware').innerText(), /Gen 2 is unsupported/);
+  const link = page.getByRole('link', { name: 'Read source: Community Android Auto' });
+  assert.match(await link.getAttribute('href'), /\/blob\/409c724ed860497b2a34f9367cb4a019287846ea\/app\/files\/tweaks\/25_androidauto-i.txt$/);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  assert.deepEqual(await calls(page), []);
+  if (process.env.SCREENSHOT_DIR) {
+    await page.locator('.aio-workbench').screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'aio-narrow.png') });
+  }
+});
+
+test('AIO workbench selection survives overlay reopen without duplicate handlers', async t => {
+  const page = await pageFor(t);
+  await page.getByRole('searchbox', { name: 'Search tweaks' }).fill('album art');
+  await page.getByRole('checkbox', { name: 'Album art layout / hide art', exact: true }).check();
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole('button', { name: 'Close overlay' }).click();
+    await page.getByRole('button', { name: 'Reopen simulator' }).click();
+  }
+  assert.match(await page.getByRole('status', { name: 'AIO selection' }).innerText(), /^1 selected/);
+  assert.deepEqual(await calls(page), []);
+  if (process.env.SCREENSHOT_DIR) {
+    await page.locator('.aio-workbench').screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'aio-workbench.png') });
+  }
+});
