@@ -23,6 +23,7 @@ On Linux, use `npx playwright install --with-deps chromium` if system libraries 
 ## Architecture and review boundaries
 
 - `simulator/` owns the desktop page, reusable injected controller, and explicit mock adapter. Controller methods and limitations are described in [the action reference](docs/actions.md). UI confirmation is separate from controller sequencing.
+- The shared [capability policy](docs/capability-policy.md) permits explicit mocks only. New test doubles must declare their mock kind; do not weaken the gate to make a test pass. A target form entry or `qualified` flag must never authorize a device path.
 - The local server serves an allowlist, not the repository root. Keep media, legacy scripts, Git metadata, and arbitrary filesystem paths inaccessible.
 - Preserve the nine upstream files byte-for-byte. Do not regenerate the baseline to accept a change. Any future payload modification requires an explicit separate review and hardware qualification plan.
 

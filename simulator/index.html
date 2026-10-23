@@ -6,6 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <title>Mazda Connect Gen 1 Root · Offline simulator</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="capabilities.js"></script>
   <script defer src="controller.js"></script>
   <script defer src="mock-adapter.js"></script>
   <script defer src="app.js"></script>
@@ -22,7 +23,28 @@
       <p class="lede">Explore the control flow in a desktop sandbox. Every action below goes to an in-memory mock. This preview cannot connect to your infotainment system.</p>
       <div class="boundary"><strong>OFFLINE SIMULATION ONLY</strong><span>No vehicle connection · No USB access · No installation payload</span></div>
     </section>
-    <div class="workspace-heading"><h2>Control flow simulator</h2><span>01 / DESKTOP FOUNDATION</span></div>
+    <section class="assessment" aria-labelledby="assessment-title">
+      <div class="workspace-heading"><h2 id="assessment-title">Know the target. See the limits.</h2><span>01 / QUALIFICATION</span></div>
+      <p class="assessment-intro">Record the target you want to investigate. These are self-reported details, not verified hardware evidence. No entry can unlock vehicle operations.</p>
+      <form id="target-form" autocomplete="off">
+        <fieldset>
+          <legend>Target identification</legend>
+          <div class="target-fields">
+            <div><label for="target-generation">Infotainment generation</label><select id="target-generation" name="generation"><option value="unknown">Not confirmed</option><option value="gen1">Gen 1 / MZD Connect</option><option value="gen2">Gen 2</option></select></div>
+            <label>Model / trim<input id="target-model" name="model" maxlength="128" placeholder="e.g. MX-5 Miata GT"></label>
+            <label>Model year<input id="target-year" name="year" inputmode="numeric" maxlength="4" placeholder="e.g. 2022"></label>
+            <label>Full OS / firmware string<input id="target-firmware" name="firmware" maxlength="128" placeholder="Copy the complete displayed string"></label>
+            <label>Firmware region<input id="target-region" name="region" maxlength="128" placeholder="As shown; do not guess"></label>
+            <label>Vehicle market<input id="target-market" name="market" maxlength="128" placeholder="e.g. US; not inferred from firmware"></label>
+            <label>CMU hardware identifier<input id="target-hardware" name="hardware" maxlength="128" placeholder="Leave empty if not established"></label>
+          </div>
+        </fieldset>
+        <p class="fine">Details stay in this page and are not saved or transmitted. Do not include a VIN or personal information. There is no need to remove hardware to fill out this form.</p>
+      </form>
+      <div class="target-result"><strong>Vehicle actions unavailable</strong><p id="target-status" role="status" aria-label="Target assessment" aria-live="polite"></p></div>
+      <ul id="feature-catalog" aria-label="Feature qualification"></ul>
+    </section>
+    <div class="workspace-heading"><h2>Control flow simulator</h2><span>02 / DESKTOP FOUNDATION</span></div>
     <div id="closed-panel" hidden class="closed-panel">
       <h3>Overlay closed</h3><p>Logging capture is disabled. Reopen to review any cleanup warnings. Commands already sent cannot be undone; pending callbacks belong to the closed session and cannot send more commands.</p>
       <button id="reopen" type="button">Reopen simulator</button>
@@ -39,7 +61,7 @@
         <p class="fine">Closing cancels future steps. It cannot undo commands already sent.</p>
       </div>
       <div class="activity">
-        <div class="activity-heading"><h3>Session activity</h3><span id="state" class="state" role="status" aria-live="polite">Idle</span></div>
+        <div class="activity-heading"><h3>Session activity</h3><span id="state" class="state" role="status" aria-label="Simulator state" aria-live="polite">Idle</span></div>
         <p class="activity-note">Mock events show requested calls, not verified vehicle outcomes.</p>
         <ol id="entries" aria-label="Session log"></ol>
         <div class="activity-footer"><span>IN-MEMORY MOCK ADAPTER</span><span id="count">0 / 200 entries</span></div>

@@ -41,7 +41,7 @@ async function pageFor(t, viewport = { width: 1280, height: 1100 }) {
     });
   });
   await page.goto(base);
-  await page.getByRole('status').filter({ hasText: 'Idle' }).waitFor();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Idle' }).waitFor();
   t.after(() => {
     assert.deepEqual(errors, [], 'no uncaught browser errors');
     for (const url of requests) { assert.ok(url.startsWith(base + '/'), `unexpected request: ${url}`); }
@@ -53,7 +53,8 @@ async function calls(page) { return page.evaluate(() => window.__testMock.calls)
 async function capture(page, name) {
   if (process.env.SCREENSHOT_DIR) {
     fs.mkdirSync(process.env.SCREENSHOT_DIR, { recursive: true });
-    await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, name + '.png'), fullPage: true });
+    await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, name + '.png'), fullPage: name !== 'confirmation' });
+    if (name === 'desktop') { await page.locator('.assessment').screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'assessment.png') }); }
   }
 }
 
@@ -74,14 +75,14 @@ test('desktop labeling, keyboard confirmation, focus and normal terminal flow', 
   await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await dialog.waitFor({ state: 'hidden' });
-  await page.getByRole('status').filter({ hasText: 'Running: Terminal navigation' }).waitFor();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Running: Terminal navigation' }).waitFor();
   assert.equal((await calls(page)).length, 1);
-  assert.match(await page.getByRole('status').innerText(), /Running/);
+  assert.match(await page.getByRole('status', { name: 'Simulator state' }).innerText(), /Running/);
   assert.equal(await page.getByRole('button', { name: 'Simulate reboot' }).isDisabled(), true);
   assert.equal(await page.getByRole('button', { name: 'Close overlay' }).evaluate(el => el === document.activeElement), true);
   await page.clock.runFor(14010);
   assert.equal((await calls(page)).length, 3);
-  assert.equal(await page.getByRole('status').innerText(), 'Complete');
+  assert.equal(await page.getByRole('status', { name: 'Simulator state' }).innerText(), 'Complete');
   assert.match(await page.getByRole('list', { name: 'Session log' }).innerText(), /ReadDTC/);
 });
 
@@ -105,7 +106,7 @@ test('close cancels delayed commands; reopening does not duplicate listeners or 
   await page.getByRole('button', { name: 'Simulate terminal navigation' }).click();
   await page.getByRole('button', { name: 'Run simulation' }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
-  await page.getByRole('status').filter({ hasText: 'Running: Terminal navigation' }).waitFor();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Running: Terminal navigation' }).waitFor();
   await page.getByRole('button', { name: 'Close overlay' }).click();
   assert.equal(await page.getByRole('button', { name: 'Reopen simulator' }).evaluate(el => el === document.activeElement), true);
   await page.clock.runFor(30000);
@@ -140,16 +141,16 @@ test('mock reboot and region operations complete without a page reload', async t
   await page.getByRole('button', { name: 'Simulate reboot', exact: true }).click();
   await page.getByRole('button', { name: 'Run simulation' }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
-  await page.getByRole('status').filter({ hasText: 'Running: Reboot' }).waitFor();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Running: Reboot' }).waitFor();
   await page.clock.runFor(7010);
   assert.deepEqual((await calls(page)).map(c => c.method), ['showFatalError', 'restart']);
-  assert.equal(await page.getByRole('status').innerText(), 'Complete');
+  assert.equal(await page.getByRole('status', { name: 'Simulator state' }).innerText(), 'Complete');
   await page.getByRole('button', { name: 'Simulate UI region: Europe', exact: true }).click();
   await page.getByRole('button', { name: 'Run simulation' }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
   await page.waitForFunction(() => window.__testMock.calls.some(call => call.method === 'setRegion'));
   assert.deepEqual((await calls(page)).at(-1), { method: 'setRegion', args: ['Region_Europe'] });
-  assert.equal(await page.getByRole('status').innerText(), 'Complete');
+  assert.equal(await page.getByRole('status', { name: 'Simulator state' }).innerText(), 'Complete');
 });
 
 test('narrow desktop/mobile viewport remains readable without horizontal overflow', async t => {
@@ -168,7 +169,7 @@ test('missing and throwing mock capabilities surface an error and allow closing'
   await page.evaluate(() => { delete window.__testMock.restart; });
   await page.getByRole('button', { name: 'Simulate reboot', exact: true }).click();
   await page.getByRole('button', { name: 'Run simulation' }).click();
-  await page.getByRole('status').filter({ hasText: 'Error' }).waitFor();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Error' }).waitFor();
   assert.match(await page.locator('#entries').innerText(), /Mock capability unavailable: restart/);
   assert.equal((await calls(page)).length, 0);
   await page.evaluate(() => { window.__testMock.setRegion = function () { throw new Error('Injected mock failure'); }; });
@@ -198,4 +199,36 @@ test('malformed HTTP request target returns 400 and the preview remains availabl
   });
   assert.equal(status, 400);
   assert.equal((await fetch(base)).status, 200);
+});
+
+test('complete self-reported target stays unqualified and is cleared on reload', async t => {
+  const page = await pageFor(t);
+  const status = page.getByRole('status', { name: 'Target assessment' });
+  assert.match(await status.innerText(), /Missing identification/);
+  await page.getByLabel('Infotainment generation', { exact: true }).selectOption('gen1');
+  for (const [label, value] of [
+    ['Model / trim', 'MX-5 Miata GT'], ['Model year', '2022'], ['Full OS / firmware string', '74.00.324A'],
+    ['Firmware region', 'self-reported-region'], ['Vehicle market', 'self-reported-market'], ['CMU hardware identifier', 'self-reported-unit']
+  ]) { await page.getByLabel(label, { exact: true }).fill(value); }
+  assert.match(await status.innerText(), /No hardware-qualified configurations/);
+  assert.equal(await page.locator('#feature-catalog li').count(), 4);
+  assert.equal(await page.getByText('Vehicle: unavailable', { exact: true }).count(), 4);
+  assert.equal((await calls(page)).length, 0);
+  await page.getByRole('button', { name: 'Simulate UI region: Europe', exact: true }).click();
+  await page.getByRole('button', { name: 'Run simulation' }).click();
+  await page.waitForFunction(() => window.__testMock.calls.some(call => call.method === 'setRegion'));
+  assert.equal(await page.getByText('Vehicle: unavailable', { exact: true }).count(), 4);
+  await page.reload();
+  await page.getByRole('status', { name: 'Simulator state' }).filter({ hasText: 'Idle' }).waitFor();
+  assert.equal(await page.getByLabel('Full OS / firmware string', { exact: true }).inputValue(), '');
+  assert.match(await status.innerText(), /Missing identification/);
+});
+
+test('Gen 2 assessment explains unsupported status without blocking the independent simulator', async t => {
+  const page = await pageFor(t);
+  await page.getByLabel('Infotainment generation', { exact: true }).selectOption('gen2');
+  assert.match(await page.getByRole('status', { name: 'Target assessment' }).innerText(), /Gen 2 is unsupported/);
+  assert.equal(await page.getByRole('button', { name: 'Simulate terminal navigation', exact: true }).isEnabled(), true);
+  assert.equal(await page.getByText('Vehicle: unavailable', { exact: true }).count(), 4);
+  assert.equal((await calls(page)).length, 0);
 });

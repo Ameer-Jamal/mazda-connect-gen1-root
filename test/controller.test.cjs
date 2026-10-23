@@ -5,6 +5,8 @@ const { create } = require('../simulator/controller.js');
 const mock = require('../simulator/mock-adapter.js');
 
 function setup(adapter = mock.create()) {
+  // Custom adapters in this helper are test doubles, declared explicitly for policy.
+  if (adapter) { adapter.kind = 'in-memory-mock'; }
   let queue = [];
   let nextId = 0;
   const scheduler = {
@@ -96,7 +98,7 @@ test('missing adapter or logger produces a useful error', () => {
   assert.equal(controller.terminal(), false);
   assert.equal(controller.snapshot().state, 'error');
   assert.equal(controller.enableLogging(), false);
-  assert.match(controller.snapshot().entries.at(-1).message, /logger unavailable/);
+  assert.match(controller.snapshot().entries.at(-1).message, /Execution blocked/);
 });
 
 test('immediate and delayed adapter exceptions stop the operation', () => {

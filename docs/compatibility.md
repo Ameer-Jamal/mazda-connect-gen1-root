@@ -2,6 +2,8 @@
 
 Evidence reviewed on 2026-10-20. No hardware/firmware combination has been independently qualified by this fork. “Reported working” is not a supported profile, and a different firmware, market, hardware revision, or prior modification can invalidate an assumption.
 
+The local [target assessment and feature policy](capability-policy.md), added 2026-10-23, preserve that boundary in software. Complete identifiers remain unqualified; all vehicle features stay unavailable. Self-reported form entries do not change this evidence table. Firmware region and vehicle market are separate fields, and neither is inferred from a model year or version prefix.
+
 | System / vehicle | Firmware / region | Evidence class | Source and limits | Verdict |
 | --- | --- | --- | --- | --- |
 | Desktop simulator | Current Chromium; Node.js 22+ tooling | Reproduced desktop tests | [Validation record](validation.md); no real framework or hardware involved | Desktop preview only |

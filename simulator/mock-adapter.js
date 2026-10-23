@@ -11,6 +11,7 @@
                 if (calls.length > 200) { calls.shift(); }
             }
             return {
+                kind: 'in-memory-mock',
                 calls: calls,
                 sendEvent: function () { record('sendEvent', arguments); },
                 showFatalError: function () { record('showFatalError', arguments); },

@@ -15,6 +15,7 @@ Independent community research into first-generation **Mazda Connect / MZD Conne
 - An [action reference](docs/actions.md), [compatibility evidence](docs/compatibility.md), and [safety findings](docs/safety-findings.md).
 - Automated desktop tests and a SHA-256 integrity check against a pinned upstream commit.
 - An [upstream report and regression review](docs/upstream-review.md) and [source-linked architecture analysis](docs/architecture.md), with tests that reproduce seven legacy defects in the actual inherited script.
+- A local target assessment and [shared feature policy](docs/capability-policy.md). Vehicle execution is unavailable for every configuration; the controller permits only explicitly declared mock execution.
 
 These improvements apply to the **new simulator only**. The inherited vehicle-facing code remains unchanged and retains its documented problems. Neither a passing test nor an integrity check establishes that a vehicle operation is safe.
 
@@ -32,6 +33,8 @@ Open **http://127.0.0.1:4173** in a current desktop browser. Stop the server wit
 The preview itself works without an internet connection after dependencies are installed. Its native confirmation dialog requires a current desktop browser; this UI is not designed for the vehicle browser.
 
 ### Try the simulated controls
+
+The target-assessment form records generation, model/year, full OS string, region, market, and hardware identification within the page only. Filling it out cannot unlock vehicle actions. Leave unknown fields blank; no hardware removal is needed. The simulator below remains independent of the assessment.
 
 1. Select **Simulate terminal navigation**, read the explanation, and confirm. Three mock events appear over 14 seconds.
 2. While it runs, other operations are disabled. **Close overlay** cancels pending steps and moves focus to **Reopen simulator**.
@@ -66,7 +69,7 @@ npm run test:upstream
 
 CI runs the integrity check, controller/integrity/ES5 syntax tests, Chromium UI tests, and an isolated upstream characterization suite. A passing `LEGACY BUG` test means a known upstream defect was reproduced, not fixed in the inherited payload. Browser installation on Linux CI also installs system dependencies. Read [CONTRIBUTING.md](CONTRIBUTING.md) for boundaries and test expectations.
 
-The upstream baseline is commit [`b1f7a7e082cb88c78183dd94cdb87bd4b02dae60`](https://github.com/mzd-evo/mzd-connect-1-root/commit/b1f7a7e082cb88c78183dd94cdb87bd4b02dae60). The checker validates all nine inherited files against both recorded hashes and that Git commit. It requires Git history containing the commit; use a normal clone or CI's full-history checkout. Source ZIP downloads do not provide that history.
+The upstream baseline is commit [`b1f7a7e082cb88c78183dd94cdb87bd4b02dae60`](https://github.com/mzd-evo/mzd-connect-1-root/commit/b1f7a7e082cb88c78183dd94cdb87bd4b02dae60). The checker validates all nine inherited files against both recorded hashes and that Git commit. It requires Git history containing the commit; use a normal clone or CI's full-history checkout. Source ZIP downloads do not provide that history. The controller and capability policy retain ES5 syntax; the desktop UI still requires modern browser APIs.
 
 ## Before vehicle integration
 

@@ -1,17 +1,19 @@
 /* Desktop research logic only. No vehicle adapter is supplied. ES5 syntax. */
 (function (root, factory) {
     if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
+        module.exports = factory(require('./capabilities.js'));
     } else {
-        root.ConnectLabController = factory();
+        root.ConnectLabController = factory(root.ConnectLabCapabilities);
     }
-}(this, function () {
+}(this, function (capabilities) {
     'use strict';
 
     function create(options) {
         var adapter = options.adapter;
         var scheduler = options.scheduler;
         var onChange = options.onChange || function () {};
+        var environment = options.environment === undefined ? 'desktop-simulation' : options.environment;
+        var target = capabilities.assessTarget(options.target).target;
         var state = 'closed';
         var operation = null;
         var entries = [];
@@ -89,10 +91,21 @@
             });
         }
 
-        function run(name, methods, steps) {
+        function assertExecution(featureId) {
+            var descriptor = adapter && Object.getOwnPropertyDescriptor(adapter, 'kind');
+            var decision = capabilities.evaluate({
+                featureId: featureId,
+                environment: environment,
+                adapterKind: descriptor && descriptor.value,
+                target: target
+            });
+            if (!decision.allowed) { throw new Error('Execution blocked: ' + decision.reason); }
+        }
+
+        function run(featureId, name, methods, steps) {
             var session;
             if (state === 'closed' || state === 'running') { return false; }
-            try { requireMethods(methods); } catch (error) { return fail(error); }
+            try { assertExecution(featureId); requireMethods(methods); } catch (error) { return fail(error); }
             generation += 1;
             session = generation;
             state = 'running';
@@ -103,6 +116,8 @@
             function next(index) {
                 if (session !== generation || state !== 'running') { return; }
                 try {
+                    assertExecution(featureId);
+                    requireMethods(methods);
                     steps[index].call();
                     if (session !== generation || state !== 'running') { return; }
                     if (index + 1 === steps.length) {
@@ -170,7 +185,7 @@
                 return true;
             },
             terminal: function () {
-                return run('Terminal navigation', ['sendEvent'], [
+                return run('terminal-navigation', 'Terminal navigation', ['sendEvent'], [
                     { call: function () {
                         adapter.sendEvent('syssettings', 'SelectDiagnostics');
                         append('info', 'Mock event: syssettings / SelectDiagnostics');
@@ -186,13 +201,13 @@
                 ]);
             },
             restart: function () {
-                return run('Reboot', ['showFatalError', 'restart'], [
+                return run('reboot', 'Reboot', ['showFatalError', 'restart'], [
                     { call: function () { adapter.showFatalError('reboot', 'xss'); } },
                     { call: function () { adapter.restart('XSS'); } }
                 ]);
             },
             region: function () {
-                return run('UI region selection', ['setRegion'], [
+                return run('ui-region-europe', 'UI region selection', ['setRegion'], [
                     { call: function () { adapter.setRegion('Region_Europe'); } }
                 ]);
             },
@@ -201,6 +216,7 @@
                 var saved = {};
                 if (state === 'closed' || state === 'running' || originals) { return false; }
                 try {
+                    assertExecution('ui-logs');
                     candidate = adapter && adapter.log;
                     levels.forEach(function (level) {
                         var descriptor = candidate && Object.getOwnPropertyDescriptor(candidate, level);
