@@ -6,6 +6,7 @@
     var dialog = document.getElementById('confirmation');
     var list = document.getElementById('entries');
     var controls = ['terminal', 'region', 'restart', 'logging'];
+    var targetFields = ['generation', 'model', 'year', 'firmware', 'region', 'market', 'hardware'];
     var controller = ConnectLabController.create({
         adapter: adapter,
         scheduler: {
@@ -40,6 +41,33 @@
         list.scrollTop = list.scrollHeight;
         document.getElementById('count').textContent = snapshot.entries.length + ' / 200 entries';
     }
+
+    function assessTarget() {
+        var input = {};
+        var catalog = document.getElementById('feature-catalog');
+        targetFields.forEach(function (field) { input[field] = document.getElementById('target-' + field).value; });
+        var result = ConnectLabCapabilities.assessTarget(input);
+        document.getElementById('target-status').textContent = result.reason + ' Simulator controls below use only the mock adapter.';
+        while (catalog.firstChild) { catalog.removeChild(catalog.firstChild); }
+        ConnectLabCapabilities.features().forEach(function (feature) {
+            var item = document.createElement('li');
+            var name = document.createElement('strong');
+            var detail = document.createElement('span');
+            var status = document.createElement('span');
+            name.textContent = feature.name;
+            detail.textContent = feature.category + ' · ' + feature.effect;
+            status.className = 'feature-status';
+            status.textContent = 'Vehicle: unavailable';
+            item.appendChild(name);
+            item.appendChild(detail);
+            item.appendChild(status);
+            catalog.appendChild(item);
+        });
+    }
+
+    document.getElementById('target-form').addEventListener('submit', function (event) { event.preventDefault(); });
+    document.getElementById('target-form').addEventListener('input', assessTarget);
+    document.getElementById('target-form').addEventListener('change', assessTarget);
 
     function confirmAction(id, title, description, action) {
         document.getElementById(id).addEventListener('click', function () {
@@ -86,5 +114,6 @@
         controller.open();
         document.getElementById('terminal').focus();
     });
+    assessTarget();
     controller.open();
 }());

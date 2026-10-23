@@ -6,7 +6,7 @@ Date: 2026-10-20. Environment: macOS ARM64, Node.js 22.22.2, Playwright 1.62.1 w
 
 | Boundary | Verification |
 | --- | --- |
-| Preview server → page | Loopback-only server serves seven explicit routes; inherited JS, media, repository files, traversal attempts, and non-read requests are rejected |
+| Preview server → page | Loopback-only server serves an explicit simulator allowlist; inherited JS, media, repository files, traversal attempts, and non-read requests are rejected |
 | Page → confirmation | Plain-language action descriptions, Cancel initially focused, forward Tab wrap, Enter activation, Escape/cancel with no adapter calls |
 | Confirmation → controller | Starting an action updates visible state; busy controls disable; controller rejects overlap independently of disabled buttons |
 | Controller → mock | Exact three-event terminal sequence; reboot and region call recording; missing capabilities and injected errors handled |
@@ -55,3 +55,9 @@ Local environment: macOS ARM64, Node.js 26.3.0, Playwright 1.62.1 / Chromium. CI
 All 48 checks pass locally. Ten newly added fault scenarios failed against our foundation controller before correction; thirteen fault tests now cover those failures and additional cleanup/forwarding cases. See [the upstream review](upstream-review.md) for the case mapping and [architecture](architecture.md) for primary-source research.
 
 The upstream suite uses fresh isolated Chromium contexts, blocks network requests, and supplies only in-memory framework/log/CSS stubs. It runs the pinned legacy script with both host-style and head-loaded dev environments. No downstream diagnostic implementation, vehicle hardware, media loader, real reboot, or persistent configuration is exercised. The previous manual keyboard/visual review remains dated 2026-10-20; this follow-up verifies UI flows through automated browser tests.
+
+## Feature-policy stage: 2026-10-23
+
+The policy stage has 44 unit/integrity/syntax tests, 11 browser/server tests, and the same 8 upstream characterizations: 63 checks total. It adds direct controller tests for denying vehicle/unknown adapters, rejecting self-asserted qualification, and halting a sequence when a declaration or capability disappears between steps. The assessment UI records firmware region separately from vehicle market, stays local to the page, and cannot unlock operations. Browser tests verify complete identifiers and Gen 2 both retain unavailable vehicle features while desktop mocks remain usable.
+
+New desktop, confirmation, and narrow screenshots were generated from the browser suite and visually reviewed. A focused [assessment screenshot](screenshots/assessment.png) shows the new identification and feature-status panel. All inherited files remain unchanged. These checks establish software policy behavior, not genuine hardware identity, third-party callback purity, or vehicle compatibility; see [policy limitations](capability-policy.md).

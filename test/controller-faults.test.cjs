@@ -5,6 +5,7 @@ const { create } = require('../simulator/controller.js');
 const mock = require('../simulator/mock-adapter.js');
 
 function setup(adapter = mock.create(), onChange = () => {}) {
+  if (adapter) { adapter.kind = 'in-memory-mock'; }
   const pending = new Map();
   let id = 0;
   const scheduler = {
