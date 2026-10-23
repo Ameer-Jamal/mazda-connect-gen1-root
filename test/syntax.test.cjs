@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const acorn = require('acorn');
 test('all simulator browser scripts parse as ES5 (not a vehicle runtime guarantee)', () => {
-  for (const name of ['capabilities.js', 'controller.js', 'mock-adapter.js', 'app.js']) {
+  for (const name of ['capabilities.js', 'controller.js', 'mock-adapter.js', 'app.js', 'aio-catalog.js', 'aio-workbench.js']) {
     acorn.parse(fs.readFileSync(path.join(__dirname, '../simulator', name), 'utf8'), { ecmaVersion: 5 });
   }
 });

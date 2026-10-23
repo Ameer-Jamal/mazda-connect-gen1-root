@@ -9,6 +9,8 @@ const files = {
   '/capabilities.js': ['capabilities.js', 'text/javascript; charset=utf-8'],
   '/mock-adapter.js': ['mock-adapter.js', 'text/javascript; charset=utf-8'],
   '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
+  '/aio-catalog.js': ['aio-catalog.js', 'text/javascript; charset=utf-8'],
+  '/aio-workbench.js': ['aio-workbench.js', 'text/javascript; charset=utf-8'],
   '/style.css': ['style.css', 'text/css; charset=utf-8'],
   '/palette.css': ['palette.css', 'text/css; charset=utf-8']
 };

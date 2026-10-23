@@ -5,7 +5,7 @@
   "description": "Offline research simulator; no vehicle-ready release",
   "scripts": {
     "preview": "node tools/preview.cjs",
-    "test": "node --test test/capabilities.test.cjs test/controller.test.cjs test/controller-faults.test.cjs test/integrity.test.cjs test/syntax.test.cjs",
+    "test": "node --test test/aio-catalog.test.cjs test/capabilities.test.cjs test/controller.test.cjs test/controller-faults.test.cjs test/integrity.test.cjs test/syntax.test.cjs",
     "test:browser": "node --test test/browser.test.cjs",
     "test:upstream": "node --test test/upstream.test.cjs",
     "check:upstream": "node tools/check-upstream.cjs"

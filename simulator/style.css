@@ -96,3 +96,21 @@ dialog p { font-size: 14px; }
   footer { padding: 20px; }
   #entries { min-height: 220px; }
 }
+
+.aio-workbench { margin: 3rem 0; }
+.aio-workbench > p { max-width: 78ch; }
+.aio-filters { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+.aio-filters label { display: block; font-size: .85rem; font-weight: 600; }
+.aio-filters input, .aio-filters select { display: block; width: 100%; padding: .75rem; margin-top: .5rem; border: 1px solid #b8c5bc; border-radius: .35rem; background: #fff; color: #182d24; font: inherit; }
+.aio-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.aio-card { border: 1px solid #cbd7ce; padding: 1.2rem; border-radius: .5rem; background: #fff; }
+.aio-card label { display: flex; gap: .65rem; align-items: baseline; cursor: pointer; margin-top: .5rem; }
+.aio-card input { flex: 0 0 auto; accent-color: #23523d; }
+.aio-card p { font-size: .9rem; }
+.aio-card a { font-size: .8rem; color: #23523d; overflow-wrap: anywhere; }
+.aio-review { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #a8c1ae; border-radius: .5rem; background: #edf3ed; }
+.aio-review li { margin: .6rem 0; }
+#aio-export { padding: .8rem 1rem; border-radius: .3rem; border: 1px solid #23523d; background: #23523d; color: white; cursor: pointer; }
+#aio-export:disabled { opacity: .5; cursor: default; }
+@media (max-width: 900px) { .aio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .aio-grid, .aio-filters { grid-template-columns: 1fr; } }

@@ -15,6 +15,7 @@ Independent community research into first-generation **Mazda Connect / MZD Conne
 - An [action reference](docs/actions.md), [compatibility evidence](docs/compatibility.md), and [safety findings](docs/safety-findings.md).
 - Automated desktop tests and a SHA-256 integrity check against a pinned upstream commit.
 - An [upstream report and regression review](docs/upstream-review.md) and [source-linked architecture analysis](docs/architecture.md), with tests that reproduce seven legacy defects in the actual inherited script.
+- An [AIO customization workbench](docs/aio-integration.md): 24 source-indexed features, search/filter/selection, and JSON review-plan export. It does not bundle executable AIO scripts or claim feature compatibility.
 - A local target assessment and [shared feature policy](docs/capability-policy.md). Vehicle execution is unavailable for every configuration; the controller permits only explicitly declared mock execution.
 
 These improvements apply to the **new simulator only**. The inherited vehicle-facing code remains unchanged and retains its documented problems. Neither a passing test nor an integrity check establishes that a vehicle operation is safe.
@@ -31,6 +32,12 @@ npm run preview
 Open **http://127.0.0.1:4173** in a current desktop browser. Stop the server with Ctrl+C. The server listens only on your computer's loopback interface, serves an explicit list of simulator assets, and does not serve the inherited payload files. There are no external fonts, analytics, remote APIs, or installation steps for a vehicle.
 
 The preview itself works without an internet connection after dependencies are installed. Its native confirmation dialog requires a current desktop browser; this UI is not designed for the vehicle browser.
+
+### Explore AIO customization
+
+Scroll to **AIO workbench**. Search for backgrounds, album art, audio behavior, speedometer or Android Auto; select features and export a JSON review plan. Filters preserve your choices. Source links point to a pinned Trevelopment/MZD-AIO snapshot. Firmware findings explain source limits, including the community video's firmware-74 bypass. Every export is metadata only, with vehicle execution unavailable. The catalog is a first integration slice, not all AIO options or a compiled installer. See the [source review and remaining integration work](docs/aio-integration.md).
+
+![AIO workbench](docs/screenshots/aio-workbench.png)
 
 ### Try the simulated controls
 

@@ -10,6 +10,8 @@
   <script defer src="controller.js"></script>
   <script defer src="mock-adapter.js"></script>
   <script defer src="app.js"></script>
+  <script defer src="aio-catalog.js"></script>
+  <script defer src="aio-workbench.js"></script>
 </head>
 <body>
   <header class="masthead">
@@ -44,7 +46,29 @@
       <div class="target-result"><strong>Vehicle actions unavailable</strong><p id="target-status" role="status" aria-label="Target assessment" aria-live="polite"></p></div>
       <ul id="feature-catalog" aria-label="Feature qualification"></ul>
     </section>
-    <div class="workspace-heading"><h2>Control flow simulator</h2><span>02 / DESKTOP FOUNDATION</span></div>
+    <section class="aio-workbench" aria-labelledby="aio-title">
+      <div class="workspace-heading"><h2 id="aio-title">Build your customization shortlist.</h2><span>02 / AIO WORKBENCH</span></div>
+      <p>AIO provides the tweaks; the upstream USB entrypoint provides access. Explore 24 source-indexed features from Trevelopment's MZD-AIO, then export a review plan. Feature presence is not a compatibility verdict.</p>
+      <div class="boundary"><strong>RESEARCH PLAN ONLY</strong><span>No executable AIO scripts or assets are bundled. Nothing selected here can run on a car.</span></div>
+      <p id="aio-provenance" class="fine"></p>
+      <div class="aio-filters">
+        <label>Search tweaks<input id="aio-search" type="search" maxlength="128" placeholder="Try album art, Android Auto, background…"></label>
+        <div><label for="aio-category">Category</label><select id="aio-category"><option value="all">All categories</option><option>Appearance</option><option>Audio</option><option>Navigation</option><option>Apps</option><option>System</option><option>Restrictions</option></select></div>
+      </div>
+      <p id="aio-results" role="status" aria-label="AIO search results"></p>
+      <div id="aio-features" class="aio-grid" aria-label="AIO feature selection"></div>
+      <div class="aio-review">
+        <h3>Your review plan</h3>
+        <p id="aio-selection" role="status" aria-label="AIO selection"></p>
+        <p id="aio-firmware"></p>
+        <p>Selection does not check every cross-feature conflict or prove restoration works. Review factory Android Auto / CarPlay separately from the community headunit app. Hiding album art and stopping Gracenote are different changes.</p>
+        <ul id="aio-selected" aria-label="Selected AIO features"></ul>
+        <button id="aio-export" type="button" disabled>Export review plan (.json)</button>
+        <button id="aio-clear" type="button" class="text-button" disabled>Clear selection</button>
+        <p class="fine">The export contains selected feature metadata, generation, and the firmware field above. It contains no installer. Selections stay in memory until you reload; only an explicit export saves a file.</p>
+      </div>
+    </section>
+    <div class="workspace-heading"><h2>Control flow simulator</h2><span>03 / DESKTOP FOUNDATION</span></div>
     <div id="closed-panel" hidden class="closed-panel">
       <h3>Overlay closed</h3><p>Logging capture is disabled. Reopen to review any cleanup warnings. Commands already sent cannot be undone; pending callbacks belong to the closed session and cannot send more commands.</p>
       <button id="reopen" type="button">Reopen simulator</button>
