@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "compilerRepository": "https://github.com/yangwenbo99/Neo-MZD-AIO",
+  "compilerCommit": "9db2bc287e13e67d38b670fa6f62981f62c59184",
+  "aioRepository": "https://github.com/Trevelopment/MZD-AIO",
+  "aioCommit": "409c724ed860497b2a34f9367cb4a019287846ea",
+  "fragments": [
+    {
+      "path": "app/files/tweaks/00_intro.txt",
+      "sha256": "51206c9097bf8bd6d863624c4ea95aebaff731a8c0f4b02f46e744a7dac85395"
+    },
+    {
+      "path": "app/files/tweaks/00_start.txt",
+      "sha256": "242763f64dc479d0f61152484bd3f9c17ce6e8c310db50dceda6dfe98952ed35"
+    },
+    {
+      "path": "app/files/tweaks/05_mainloop-i.txt",
+      "sha256": "3870cb8eeca75516222e44f45806f4a569e1755b4dc97fdd335cd88772bf0acc"
+    },
+    {
+      "path": "app/files/tweaks/06_listloop-i.txt",
+      "sha256": "b66f48be0da40dcb2206cf1fd0c8cb2f9e2b7c8ed111fbf3de18d33bf8a3db2c"
+    },
+    {
+      "path": "app/files/tweaks/07_shorterdelay-i.txt",
+      "sha256": "e61ef2f61bd650470aa5be63baa026d9241977a485ecf1d97722ce6114ac1230"
+    },
+    {
+      "path": "app/files/tweaks/00_end.txt",
+      "sha256": "7e40e5fc9e02759825c5b37444f0794f092cb8632535cd3285117645bb6268b3"
+    }
+  ],
+  "request": {
+    "schema_version": 1,
+    "installer": {
+      "script_name": "run.sh",
+      "keep_backups": true,
+      "test_backups": true,
+      "skip_confirmation": false,
+      "apps_to_resources": false,
+      "retrieve_cmu_data": false,
+      "self_destruct": false
+    },
+    "tweaks": {
+      "main_menu_loop": {
+        "action": "install"
+      },
+      "list_loop": {
+        "action": "install"
+      },
+      "shorter_delay": {
+        "action": "install"
+      }
+    }
+  },
+  "payloads": [
+    {
+      "path": "app/files/tweaks/config/main-menu-loop/jci/gui/apps/system/controls/MainMenu/js/MainMenuCtrl.js",
+      "target": "config/main-menu-loop/jci/gui/apps/system/controls/MainMenu/js/MainMenuCtrl.js",
+      "sha256": "60852586c374a4994bc6f4672218354a57c99453f723dd3065d5d3f6a76068b7"
+    },
+    {
+      "path": "app/files/tweaks/config/list-loop/jci/gui/common/controls/List2/js/List2Ctrl.js",
+      "target": "config/list-loop/jci/gui/common/controls/List2/js/List2Ctrl.js",
+      "sha256": "81eebc20dfcb6365c178a9483f854ad779bdf478fe95f88f0155e7d93cc928f9"
+    }
+  ],
+  "dependencyReview": {
+    "reviewedAt": "2026-10-31",
+    "sharpVersion": "0.34.5",
+    "status": "high-severity-advisories-open",
+    "advisories": [
+      "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+      "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+      "https://github.com/advisories/GHSA-wq5f-xc86-pv6w"
+    ],
+    "restriction": "No image inputs in this experiment. Not approved for product integration."
+  }
+}

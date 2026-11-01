@@ -71,6 +71,10 @@ The target-assessment form records generation, model/year, full OS string, regio
 
 ND2 identifies a Miata revision, not infotainment generation. Identifying Gen 1 alone does not establish compatibility. See the [full evidence table](docs/compatibility.md) before drawing conclusions from model years or anecdotes.
 
+## Broader ecosystem research
+
+The [public-repository review](docs/public-repository-research.md) identifies a standalone AIO compiler, desktop-hardening forks, scoped transaction/backup work, native factory-projection projects and drive-library candidates. A developer-only audit exercised one real external assembly path and retained hashes rather than installer files. Its image dependency has reported advisories and is not added to this app or release. No vehicle support is unlocked.
+
 ## Development and verification
 
 ```sh
