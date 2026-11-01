@@ -22,6 +22,7 @@ function createImage(info, hooks) {
     },
     async readFile(id, path) { return files.get(path) || null; },
     async listFiles() { return Array.from(files.keys()); },
+    async removeFile(id, path) { calls.push('remove:' + path); if (hooks.noRemove) { return; } files.delete(path); },
     async flush() { calls.push('flush'); }
   };
 }

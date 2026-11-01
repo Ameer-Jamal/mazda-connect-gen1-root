@@ -10,7 +10,8 @@
 | Capacity | Rejects unknown, too-small (package size), or oversized (default 64 GiB) devices. |
 | Confirmation | The user must supply a phrase containing the drive serial and size. Anything else leaves the drive untouched. |
 | Identity change | The identity fingerprint (id, serial, vendor, model, size, bus) is rechecked twice before erasing and before every file write. |
-| Unsafe package | Rejects absolute, `..`, empty-segment, space/odd-character and duplicate paths. |
+| Unsafe package paths | Rejects absolute, `.`/`..`, empty segments, backslash, control characters, FAT-illegal characters, trailing dot/space, and case-insensitive duplicates. Names are data, never shell text: a literal launcher name such as `$(...).up` is valid and is written verbatim. |
+| OS metadata | Packages may not contain `._*`, `.DS_Store` or Spotlight/fseventsd/Trashes entries. AppleDouble `._<launcher>` files can stop the CMU detecting an update ([TouchTune helper](https://github.com/Miatafy/TouchTune/blob/6061a6c98eeb1c348773ec4b2fd29eef3b39441e/macos-usb-eject.sh)), so sidecars the OS adds during writing are removed through the adapter and the drive is re-listed; if they cannot be removed the run fails. |
 | Interrupted write / cancellation | Reported as `failed` / `cancelled` with `driveState: erased-incomplete`. |
 | Corrupt write | Read-back SHA-256 of every file must match the plan; unexpected extra files fail. |
 

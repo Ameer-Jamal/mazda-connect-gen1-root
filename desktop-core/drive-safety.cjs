@@ -30,6 +30,24 @@ function assessCandidate(device, options) {
   return { ok: reasons.length === 0, reasons: reasons };
 }
 
+/* Names are data, never shell text: literal launcher names such as "$(x).up" are valid and are only ever passed to the adapter.
+ * Rejected: structure that escapes the volume or breaks FAT-style filesystems. */
+function safePath(path) {
+  if (typeof path !== 'string' || !path || path.length > 1024) { return false; }
+  if (/[\x00-\x1f\x7f\\:*?"<>|]/.test(path)) { return false; }
+  return path.split('/').every(function (segment) {
+    return segment && segment !== '.' && segment !== '..' && segment.length <= 255 && !/[. ]$/.test(segment);
+  });
+}
+
+/* Files macOS/Finder add on their own; "._<launcher>" AppleDouble files can stop the CMU detecting the update. */
+function isSidecar(path) {
+  const parts = path.split('/');
+  return parts.some(function (part) { return part.indexOf('._') === 0; }) ||
+    ['.DS_Store', '.Spotlight-V100', '.fseventsd', '.Trashes', '.TemporaryItems'].indexOf(parts[0]) !== -1 ||
+    parts[parts.length - 1] === '.DS_Store';
+}
+
 function confirmationPhrase(device) {
   return 'ERASE ' + device.serial + ' ' + Math.round(device.sizeBytes / GIB * 10) / 10 + 'GiB';
 }
@@ -48,11 +66,11 @@ function createErasePlan(device, files, options) {
   if (!verdict.ok) { throw new Error('Drive rejected: ' + verdict.reasons.join(' ')); }
   const seen = {};
   files.forEach(function (file) {
-    if (typeof file.path !== 'string' || !/^[A-Za-z0-9._\-]+(\/[A-Za-z0-9._\-]+)*$/.test(file.path) || file.path.split('/').indexOf('..') !== -1) {
-      throw new Error('Unsafe package path: ' + file.path);
-    }
-    if (seen[file.path]) { throw new Error('Duplicate package path: ' + file.path); }
-    seen[file.path] = true;
+    if (!safePath(file.path)) { throw new Error('Unsafe package path: ' + JSON.stringify(file.path)); }
+    if (isSidecar(file.path)) { throw new Error('Package must not contain OS metadata file: ' + file.path); }
+    const key = file.path.toLowerCase();
+    if (seen[key]) { throw new Error('Duplicate package path (case-insensitive): ' + file.path); }
+    seen[key] = true;
   });
   return {
     deviceId: device.id,
@@ -105,9 +123,14 @@ async function prepareDrive(plan, files, confirmation, adapter, options) {
       if (digest !== expected.sha256) { return fail('failed', 'Verification failed for ' + expected.path + '. Drive is incomplete.'); }
       progress({ step: 'verify', path: expected.path });
     }
-    const extra = (await adapter.listFiles(plan.deviceId)).filter(function (p) {
-      return !plan.files.some(function (f) { return f.path === p; });
-    });
+    var listed = await adapter.listFiles(plan.deviceId);
+    const sidecars = listed.filter(isSidecar);
+    if (sidecars.length) {
+      if (typeof adapter.removeFile !== 'function') { return fail('failed', 'OS metadata files present and adapter cannot remove them: ' + sidecars.join(', ')); }
+      for (var k = 0; k < sidecars.length; k++) { await adapter.removeFile(plan.deviceId, sidecars[k]); }
+      listed = await adapter.listFiles(plan.deviceId);
+    }
+    const extra = listed.filter(function (p) { return !plan.files.some(function (f) { return f.path === p; }); });
     if (extra.length) { return fail('failed', 'Unexpected files on drive: ' + extra.join(', ')); }
     await adapter.flush(plan.deviceId);
     driveState = 'written-verified';
@@ -117,4 +140,4 @@ async function prepareDrive(plan, files, confirmation, adapter, options) {
   }
 }
 
-module.exports = { assessCandidate, listCandidates, createErasePlan, prepareDrive, fingerprint, confirmationPhrase, DEFAULT_MAX_BYTES };
+module.exports = { safePath, isSidecar, assessCandidate, listCandidates, createErasePlan, prepareDrive, fingerprint, confirmationPhrase, DEFAULT_MAX_BYTES };

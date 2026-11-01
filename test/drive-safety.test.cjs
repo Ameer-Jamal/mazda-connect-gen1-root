@@ -28,7 +28,7 @@ test('listCandidates returns every device with a verdict and selects none', () =
 
 test('plan rejects too-small drives and unsafe or duplicate package paths', () => {
   assert.throws(() => safety.createErasePlan({ ...stick, sizeBytes: 3 }, files), /Too small/);
-  for (const path of ['../x', '/abs', 'a//b', 'a/../b', 'a b']) {
+  for (const path of ['../x', '/abs', 'a//b', 'a/../b', 'a\\b', 'a:b', 'x.', 'a\nb', '']) {
     assert.throws(() => safety.createErasePlan(stick, [{ path, data: Buffer.from('x') }]), /Unsafe/, path);
   }
   assert.throws(() => safety.createErasePlan(stick, [files[0], files[0]]), /Duplicate/);
@@ -110,4 +110,33 @@ test('adapter that leaves extra files behind fails verification', async () => {
 test('confirmation phrase names the serial and size so a different drive needs a different phrase', () => {
   assert.notEqual(safety.confirmationPhrase(stick), safety.confirmationPhrase({ ...stick, serial: 'SN999' }));
   assert.notEqual(safety.confirmationPhrase(stick), safety.confirmationPhrase({ ...stick, sizeBytes: 32 * GIB }));
+});
+
+test('literal launcher names with shell metacharacters and spaces are valid data and written verbatim', async () => {
+  const launcher = '$(touch pwned).up';
+  const pkg = [{ path: launcher, data: Buffer.from('l') }, { path: 'my patches/p.sh', data: Buffer.from('p') }];
+  const plan = safety.createErasePlan(stick, pkg);
+  const image = createImage(stick);
+  const result = await safety.prepareDrive(plan, pkg, plan.phrase, image);
+  assert.equal(result.status, 'ok');
+  assert.ok(image.files.has(launcher));
+});
+
+test('case-insensitive duplicates and packaged OS metadata are rejected', () => {
+  assert.throws(() => safety.createErasePlan(stick, [{ path: 'A.txt', data: Buffer.from('1') }, { path: 'a.txt', data: Buffer.from('2') }]), /case-insensitive/);
+  for (const path of ['._x.up', 'dir/._x', '.DS_Store', '.Spotlight-V100/x', 'sub/.DS_Store']) {
+    assert.throws(() => safety.createErasePlan(stick, [{ path, data: Buffer.from('x') }]), /metadata/, path);
+  }
+});
+
+test('sidecars added by the OS after writing are removed; a drive that keeps them fails', async () => {
+  const plan = safety.createErasePlan(stick, files);
+  const add = (image) => { const w = image.writeFile; image.writeFile = async (...a) => { await w(...a); image.files.set('._b.bin', Buffer.from('x')); image.files.set('.DS_Store', Buffer.from('x')); }; return image; };
+  const cleaned = add(createImage(stick));
+  const r1 = await safety.prepareDrive(plan, files, plan.phrase, cleaned);
+  assert.equal(r1.status, 'ok');
+  assert.ok(!cleaned.files.has('._b.bin') && !cleaned.files.has('.DS_Store'));
+  const r2 = await safety.prepareDrive(plan, files, plan.phrase, add(createImage(stick, { noRemove: true })));
+  assert.equal(r2.status, 'failed');
+  assert.match(r2.message, /Unexpected files/);
 });
