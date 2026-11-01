@@ -24,3 +24,13 @@ Results carry an honest `driveState`: `untouched`, `erased-incomplete` or `writt
 ## Still missing
 
 A real macOS/Windows/Linux adapter (drive enumeration, unmount, format, eject), reviewed against the actual platform tools and exercised only on a disposable drive you authorize by exact device; filesystem choice and formatting; the package builder; and qualified feature packs.
+
+## Neo compiler adapter
+
+`desktop-core/neo-adapter.cjs` connects the external [Neo-MZD-AIO](https://github.com/yangwenbo99/Neo-MZD-AIO/tree/9db2bc287e13e67d38b670fa6f62981f62c59184/cli) compiler (GPL-3.0, reviewed commit `9db2bc2`) to drive preparation. Neo stays a separate program; none of its code is vendored here.
+
+- `buildWithNeo` runs `build CONFIG --output DIR` only when the checkout's HEAD equals the reviewed commit, the output directory does not exist, paths are absolute, and a timeout and minimal environment apply. It fetches nothing; dependencies must already be installed. It is not an OS sandbox.
+- `loadPackageFromDirectory` treats the output as untrusted data: symlinks, special files, unsafe names, OS metadata, empty packages and size-limit breaches reject the whole package instead of being skipped. The result feeds `createErasePlan`/`prepareDrive` unchanged.
+- Generated installers are never executed.
+
+Not covered: the adapter is tested against a stub compiler, not the real one. Neo's locked image library (Sharp 0.34.5) has high-severity advisories ([draft PR #8](https://github.com/Ameer-Jamal/mazda-connect-gen1-root/pull/8)), so adoption needs a corrected dependency set. Assembling a package says nothing about firmware compatibility; AIO's firmware-74 refusal is carried through unchanged and no bypass is added.
