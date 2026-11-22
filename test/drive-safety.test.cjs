@@ -140,3 +140,83 @@ test('sidecars added by the OS after writing are removed; a drive that keeps the
   assert.equal(r2.status, 'failed');
   assert.match(r2.message, /Unexpected files/);
 });
+
+test('cancellation that lands during an awaited recheck stops before erase and before each write', async () => {
+  const plan = safety.createErasePlan(stick, files);
+  for (const abortOn of [1, 2]) {
+    const ac = new AbortController();
+    const image = createImage(stick, { onDescribe: (n) => { if (n === abortOn) { ac.abort(); } } });
+    const result = await safety.prepareDrive(plan, files, plan.phrase, image, { signal: ac.signal });
+    assert.equal(result.status, 'cancelled', 'abort on describe ' + abortOn);
+    assert.equal(result.driveState, 'untouched');
+    assert.ok(!image.calls.includes('erase'));
+  }
+  const ac = new AbortController();
+  const image = createImage(stick, { onDescribe: () => { if (image.calls.includes('erase')) { ac.abort(); } } });
+  const result = await safety.prepareDrive(plan, files, plan.phrase, image, { signal: ac.signal });
+  assert.equal(result.status, 'cancelled');
+  assert.equal(result.driveState, 'erased-incomplete');
+  assert.ok(!image.calls.some((c) => c.startsWith('write:')));
+});
+
+test('approved manifest is snapshotted: caller mutation during the run cannot change what is written', async () => {
+  const pkg = files.map((f) => ({ path: f.path, data: Buffer.from(f.data) }));
+  const plan = safety.createErasePlan(stick, pkg);
+  assert.ok(Object.isFrozen(plan) && Object.isFrozen(plan.files) && Object.isFrozen(plan.files[0]));
+  const image = createImage(stick, { onDescribe: () => { pkg[0].data.fill(0x7a); pkg[1].path = 'evil.bin'; pkg.push({ path: 'extra', data: Buffer.from('x') }); } });
+  const result = await safety.prepareDrive(plan, pkg, plan.phrase, image);
+  assert.equal(result.status, 'ok');
+  assert.deepEqual([...image.files.keys()].sort(), ['b.bin', 'config/a.txt']);
+  assert.equal(image.files.get('config/a.txt').toString(), 'alpha');
+});
+
+test('package or plan that does not match the approved manifest is rejected without erasing', async () => {
+  const plan = safety.createErasePlan(stick, files);
+  const cases = [
+    [plan, [files[0], { path: 'b.bin', data: Buffer.from('BETA') }]],
+    [plan, [files[0]]],
+    [plan, [files[1], files[0]]],
+    [{ ...plan, files: [...plan.files, { path: '../x', size: 1, sha256: 'x' }] }, [...files, { path: '../x', data: Buffer.from('x') }]],
+    [{ ...plan, phrase: 'ERASE OTHER 1GiB' }, files]
+  ];
+  for (const [p, pkg] of cases) {
+    const image = createImage(stick);
+    const result = await safety.prepareDrive(p, pkg, p.phrase, image);
+    assert.equal(result.status, 'rejected');
+    assert.equal(result.driveState, 'untouched');
+    assert.ok(!image.calls.includes('erase'));
+  }
+});
+
+test('case-insensitive FAT file/directory and directory-spelling collisions are rejected', () => {
+  const x = Buffer.from('x');
+  for (const paths of [['Config', 'config/a.txt'], ['a/b/c', 'A/B'], ['a', 'a/b'], ['Dir/a', 'dir/b'], ['x/Sub/a', 'x/sub/b']]) {
+    assert.throws(() => safety.createErasePlan(stick, paths.map((path) => ({ path, data: x }))), /case/, paths.join(','));
+  }
+  for (const paths of [['dir/a', 'dir/b'], ['config.txt', 'config/a.txt'], ['Dir/a', 'Dir/sub/b']]) {
+    assert.doesNotThrow(() => safety.createErasePlan(stick, paths.map((path) => ({ path, data: x }))), paths.join(','));
+  }
+});
+
+test('cancellation from a progress handler stops the announced operation', async () => {
+  for (const step of ['erase', 'write']) {
+    const image = createImage(stick);
+    const plan = safety.createErasePlan(stick, files);
+    const controller = new AbortController();
+    let erases = 0;
+    let writes = 0;
+    const adapter = {
+      ...image,
+      async erase() { erases++; },
+      async writeFile() { writes++; }
+    };
+    const result = await safety.prepareDrive(plan, files, plan.phrase, adapter, {
+      signal: controller.signal,
+      onProgress(event) { if (event.step === step) { controller.abort(); } }
+    });
+    assert.equal(result.status, 'cancelled');
+    assert.equal(result.driveState, step === 'erase' ? 'untouched' : 'erased-incomplete');
+    assert.equal(erases, step === 'erase' ? 0 : 1);
+    assert.equal(writes, 0);
+  }
+});

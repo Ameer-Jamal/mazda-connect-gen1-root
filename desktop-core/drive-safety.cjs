@@ -60,61 +60,119 @@ function listCandidates(devices, options) {
   });
 }
 
+/* FAT is case-insensitive, so "Config" (file) and "config/a.txt" collide, and "Dir/a" plus "dir/b" share one directory
+ * whose on-disk spelling would not match the plan. Returns a problem string or null. */
+function manifestPathProblem(paths) {
+  const filesByKey = new Map();
+  const dirsByKey = new Map();
+  for (const path of paths) {
+    if (!safePath(path)) { return 'Unsafe package path: ' + JSON.stringify(path); }
+    if (isSidecar(path)) { return 'Package must not contain OS metadata file: ' + path; }
+    const key = path.toLowerCase();
+    if (filesByKey.has(key)) { return 'Duplicate package path (case-insensitive): ' + path; }
+    filesByKey.set(key, path);
+  }
+  for (const path of paths) {
+    const segments = path.split('/');
+    for (var k = 1; k < segments.length; k++) {
+      const dir = segments.slice(0, k).join('/');
+      const key = dir.toLowerCase();
+      if (filesByKey.has(key)) { return 'Package path ' + path + ' needs directory ' + dir + ' but ' + filesByKey.get(key) + ' is a file (case-insensitive).'; }
+      if (dirsByKey.has(key) && dirsByKey.get(key) !== dir) { return 'Directory spelled with different case: ' + dirsByKey.get(key) + ' and ' + dir; }
+      dirsByKey.set(key, dir);
+    }
+  }
+  return null;
+}
+
+function sha256(data) { return crypto.createHash('sha256').update(data).digest('hex'); }
+
 function createErasePlan(device, files, options) {
+  files.forEach(function (file) {
+    if (!(file.data instanceof Uint8Array)) { throw new Error('Package data must be bytes: ' + JSON.stringify(file.path)); }
+  });
   const requiredBytes = files.reduce(function (sum, file) { return sum + file.data.length; }, 0);
   const verdict = assessCandidate(device, Object.assign({}, options, { requiredBytes: requiredBytes }));
   if (!verdict.ok) { throw new Error('Drive rejected: ' + verdict.reasons.join(' ')); }
-  const seen = {};
-  files.forEach(function (file) {
-    if (!safePath(file.path)) { throw new Error('Unsafe package path: ' + JSON.stringify(file.path)); }
-    if (isSidecar(file.path)) { throw new Error('Package must not contain OS metadata file: ' + file.path); }
-    const key = file.path.toLowerCase();
-    if (seen[key]) { throw new Error('Duplicate package path (case-insensitive): ' + file.path); }
-    seen[key] = true;
-  });
-  return {
+  const problem = manifestPathProblem(files.map(function (file) { return file.path; }));
+  if (problem) { throw new Error(problem); }
+  return Object.freeze({
     deviceId: device.id,
     fingerprint: fingerprint(device),
     phrase: confirmationPhrase(device),
     requiredBytes: requiredBytes,
-    files: files.map(function (file) {
-      return { path: file.path, size: file.data.length, sha256: crypto.createHash('sha256').update(file.data).digest('hex') };
-    })
+    files: Object.freeze(files.map(function (file) {
+      return Object.freeze({ path: file.path, size: file.data.length, sha256: sha256(file.data) });
+    }))
+  });
+}
+
+/* Copies the approved plan and package bytes before the first await, so a caller mutating either during the run
+ * cannot change what is erased, written or verified. The bytes must match the approved manifest exactly. */
+function snapshotPlan(plan, files) {
+  if (!plan || typeof plan !== 'object' || !Array.isArray(plan.files) || !Array.isArray(files)) { return { problem: 'Plan or package is malformed.' }; }
+  const manifest = plan.files.map(function (entry) { return Object.freeze({ path: String(entry && entry.path), size: entry && entry.size, sha256: String(entry && entry.sha256) }); });
+  if (files.length !== manifest.length) { return { problem: 'Package does not match the approved plan.' }; }
+  const data = [];
+  for (var i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file || !(file.data instanceof Uint8Array)) { return { problem: 'Package data must be bytes.' }; }
+    const copy = Buffer.from(file.data);
+    if (file.path !== manifest[i].path || copy.length !== manifest[i].size || sha256(copy) !== manifest[i].sha256) {
+      return { problem: 'Package does not match the approved plan at ' + JSON.stringify(file.path) + '.' };
+    }
+    data.push(copy);
+  }
+  const problem = manifestPathProblem(manifest.map(function (entry) { return entry.path; }));
+  if (problem) { return { problem: problem }; }
+  const requiredBytes = data.reduce(function (sum, bytes) { return sum + bytes.length; }, 0);
+  return {
+    plan: Object.freeze({ deviceId: plan.deviceId, fingerprint: plan.fingerprint, phrase: plan.phrase, requiredBytes: requiredBytes, files: Object.freeze(manifest) }),
+    data: data
   };
 }
 
 /* Returns a result object rather than throwing for expected failures.
  * driveState is honest about what happened to the drive: 'untouched', 'erased-incomplete' or 'written-verified'. */
-async function prepareDrive(plan, files, confirmation, adapter, options) {
+async function prepareDrive(approvedPlan, files, confirmation, adapter, options) {
   options = options || {};
   const signal = options.signal;
   const progress = options.onProgress || function () {};
   var driveState = 'untouched';
   function fail(status, message) { return { status: status, driveState: driveState, message: message }; }
+  function cancelled() { return Boolean(signal && signal.aborted); }
 
+  const snapshot = snapshotPlan(approvedPlan, files);
+  if (snapshot.problem) { return fail('rejected', snapshot.problem); }
+  const plan = snapshot.plan;
   if (confirmation !== plan.phrase) { return fail('rejected', 'Confirmation phrase does not match.'); }
   async function recheck() {
     const current = await adapter.describe(plan.deviceId);
-    if (!current || fingerprint(current) !== plan.fingerprint) { return 'Drive identity changed or drive disappeared.'; }
+    if (!current || fingerprint(current) !== plan.fingerprint || confirmationPhrase(current) !== plan.phrase) { return 'Drive identity changed or drive disappeared.'; }
     const verdict = assessCandidate(current, { maxBytes: options.maxBytes, requiredBytes: plan.requiredBytes });
     return verdict.ok ? null : verdict.reasons.join(' ');
   }
   try {
+    // Cancellation is checked after every awaited recheck, so an abort that lands while waiting still stops the erase or write.
     var problem = await recheck();
     if (problem) { return fail('rejected', problem); }
-    if (signal && signal.aborted) { return fail('cancelled', 'Cancelled before erasing.'); }
+    if (cancelled()) { return fail('cancelled', 'Cancelled before erasing.'); }
     problem = await recheck();
     if (problem) { return fail('rejected', problem); }
+    if (cancelled()) { return fail('cancelled', 'Cancelled before erasing.'); }
 
-    driveState = 'erased-incomplete';
     progress({ step: 'erase' });
+    if (cancelled()) { return fail('cancelled', 'Cancelled before erasing.'); }
+    driveState = 'erased-incomplete';
     await adapter.erase(plan.deviceId);
-    for (var i = 0; i < files.length; i++) {
-      if (signal && signal.aborted) { return fail('cancelled', 'Cancelled during writing; drive was erased and is incomplete.'); }
+    for (var i = 0; i < plan.files.length; i++) {
+      if (cancelled()) { return fail('cancelled', 'Cancelled during writing; drive was erased and is incomplete.'); }
       problem = await recheck();
       if (problem) { return fail('failed', problem + ' Drive is incomplete.'); }
-      progress({ step: 'write', path: files[i].path });
-      await adapter.writeFile(plan.deviceId, files[i].path, files[i].data);
+      if (cancelled()) { return fail('cancelled', 'Cancelled during writing; drive was erased and is incomplete.'); }
+      progress({ step: 'write', path: plan.files[i].path });
+      if (cancelled()) { return fail('cancelled', 'Cancelled during writing; drive was erased and is incomplete.'); }
+      await adapter.writeFile(plan.deviceId, plan.files[i].path, snapshot.data[i]);
     }
     for (var j = 0; j < plan.files.length; j++) {
       const expected = plan.files[j];
