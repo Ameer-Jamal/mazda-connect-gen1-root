@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "kind": "aio-assembly-audit",
+  "compilerRepository": "https://github.com/yangwenbo99/Neo-MZD-AIO",
+  "compilerCommit": "9db2bc287e13e67d38b670fa6f62981f62c59184",
+  "aioRepository": "https://github.com/Trevelopment/MZD-AIO",
+  "aioCommit": "409c724ed860497b2a34f9367cb4a019287846ea",
+  "request": {
+    "schema_version": 1,
+    "installer": {
+      "script_name": "run.sh",
+      "keep_backups": true,
+      "test_backups": true,
+      "skip_confirmation": false,
+      "apps_to_resources": false,
+      "retrieve_cmu_data": false,
+      "self_destruct": false
+    },
+    "tweaks": {
+      "main_menu_loop": {
+        "action": "install"
+      },
+      "list_loop": {
+        "action": "install"
+      },
+      "shorter_delay": {
+        "action": "install"
+      }
+    }
+  },
+  "commands": {
+    "validate": {
+      "exitCode": 0
+    },
+    "plan": {
+      "exitCode": 0
+    },
+    "build": {
+      "exitCode": 0
+    }
+  },
+  "compilerSources": [
+    {
+      "path": "cli/bin/mzd-aio.js",
+      "sha256": "c11cca865a5a4c2e9346d356d08a2d94bf276104e003baa2ab3e0fc86775db9c"
+    },
+    {
+      "path": "cli/package-lock.json",
+      "sha256": "4b3f0feb794e2bec22e485e6868a8e44199c758e52b0314eb6900cce9cd67285"
+    },
+    {
+      "path": "cli/package.json",
+      "sha256": "75219ca4fe8ad32086e30017a6142e5b5529bb441d0bdea18bed8bb941ed61d7"
+    },
+    {
+      "path": "cli/src/autorun.js",
+      "sha256": "765a85ee23b8e88a8fbb8d99bc96ccf40d6ce6f21d057ddc49045d71ad277e36"
+    },
+    {
+      "path": "cli/src/build.js",
+      "sha256": "e3b2ff7cd9cd134454c5a2d3c19487d594336c8f12c7cd84f61769d4c225060a"
+    },
+    {
+      "path": "cli/src/config.js",
+      "sha256": "39758f50b47b9025b6cb47d861cd3a79595fbdcd2cf642f046602b3cd72fa2f2"
+    },
+    {
+      "path": "cli/src/plan.js",
+      "sha256": "14ea6d354d0dc97b7cbad1b82402ac2063612263b4b4738e30ceecace99147f4"
+    },
+    {
+      "path": "cli/src/registry.js",
+      "sha256": "b623dba15211e8c5efc5ddf744f6dac1304ad1a42b3d88f39dd297d4887b550c"
+    },
+    {
+      "path": "cli/src/resources.js",
+      "sha256": "4c47577158eb8adbfcb3c2d616d1e48599c493927360cdbe78dc118e7fbc5cf3"
+    },
+    {
+      "path": "cli/src/speedometer.js",
+      "sha256": "2fe0375312ecc593f838bca28cedd652e9e9a910d28c41264bc622d36847acdf"
+    },
+    {
+      "path": "cli/src/webui.js",
+      "sha256": "112c3e009c94e48dd635b9a7fa0e00732f95312e4e5cd7fcac4b00ad93f7e2bd"
+    }
+  ],
+  "directDependencyVersions": {
+    "sharp": "0.34.5",
+    "xml2js": "0.6.2",
+    "yaml": "2.9.1",
+    "yauzl": "3.4.0"
+  },
+  "dependencyReview": {
+    "reviewedAt": "2026-10-31",
+    "sharpVersion": "0.34.5",
+    "status": "high-severity-advisories-open",
+    "advisories": [
+      "https://github.com/advisories/GHSA-f88m-g3jw-g9cj",
+      "https://github.com/advisories/GHSA-rgj7-g3m4-5g8c",
+      "https://github.com/advisories/GHSA-wq5f-xc86-pv6w"
+    ],
+    "restriction": "No image inputs in this experiment. Not approved for product integration."
+  },
+  "payloadsPreserved": [
+    {
+      "path": "app/files/tweaks/config/main-menu-loop/jci/gui/apps/system/controls/MainMenu/js/MainMenuCtrl.js",
+      "target": "config/main-menu-loop/jci/gui/apps/system/controls/MainMenu/js/MainMenuCtrl.js",
+      "sha256": "60852586c374a4994bc6f4672218354a57c99453f723dd3065d5d3f6a76068b7"
+    },
+    {
+      "path": "app/files/tweaks/config/list-loop/jci/gui/common/controls/List2/js/List2Ctrl.js",
+      "target": "config/list-loop/jci/gui/common/controls/List2/js/List2Ctrl.js",
+      "sha256": "81eebc20dfcb6365c178a9483f854ad779bdf478fe95f88f0155e7d93cc928f9"
+    }
+  ],
+  "fragmentsPreservedInOrder": [
+    {
+      "path": "app/files/tweaks/00_intro.txt",
+      "sha256": "51206c9097bf8bd6d863624c4ea95aebaff731a8c0f4b02f46e744a7dac85395",
+      "scriptOffset": 0
+    },
+    {
+      "path": "app/files/tweaks/00_start.txt",
+      "sha256": "242763f64dc479d0f61152484bd3f9c17ce6e8c310db50dceda6dfe98952ed35",
+      "scriptOffset": 1353
+    },
+    {
+      "path": "app/files/tweaks/05_mainloop-i.txt",
+      "sha256": "3870cb8eeca75516222e44f45806f4a569e1755b4dc97fdd335cd88772bf0acc",
+      "scriptOffset": 30810
+    },
+    {
+      "path": "app/files/tweaks/06_listloop-i.txt",
+      "sha256": "b66f48be0da40dcb2206cf1fd0c8cb2f9e2b7c8ed111fbf3de18d33bf8a3db2c",
+      "scriptOffset": 31475
+    },
+    {
+      "path": "app/files/tweaks/07_shorterdelay-i.txt",
+      "sha256": "e61ef2f61bd650470aa5be63baa026d9241977a485ecf1d97722ce6114ac1230",
+      "scriptOffset": 33430
+    },
+    {
+      "path": "app/files/tweaks/00_end.txt",
+      "sha256": "7e40e5fc9e02759825c5b37444f0794f092cb8632535cd3285117645bb6268b3",
+      "scriptOffset": 34750
+    }
+  ],
+  "generatedFiles": [
+    {
+      "path": "MZD_LOG.md",
+      "bytes": 548,
+      "sha256": "56bd373da148a48eb73e1632215b519b4b0619ae0fd9017f3eaaed359f556cde"
+    },
+    {
+      "path": "config/list-loop/jci/gui/common/controls/List2/js/List2Ctrl.js",
+      "bytes": 477283,
+      "sha256": "81eebc20dfcb6365c178a9483f854ad779bdf478fe95f88f0155e7d93cc928f9"
+    },
+    {
+      "path": "config/main-menu-loop/jci/gui/apps/system/controls/MainMenu/js/MainMenuCtrl.js",
+      "bytes": 21811,
+      "sha256": "60852586c374a4994bc6f4672218354a57c99453f723dd3065d5d3f6a76068b7"
+    },
+    {
+      "path": "run.sh",
+      "bytes": 36270,
+      "sha256": "1e072a1111ef89ae4db7ba8d64249f06e32af695557c71715aa2f86db3568570"
+    }
+  ],
+  "shellSyntaxCheck": "bash -n passed; installer not executed",
+  "vehicleAllowed": false,
+  "vehicleQualification": "none",
+  "artifactExported": false,
+  "generatedFilesRemovedOnExit": true,
+  "limits": [
+    "One three-tweak assembly request only",
+    "Dependency versions checked; installed dependency bytes are not attested",
+    "JavaScript network guard is not an OS sandbox",
+    "Syntax and source inclusion do not validate installation or restoration"
+  ]
+}

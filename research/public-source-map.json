@@ -1,0 +1,102 @@
+{
+  "reviewedAt": "2026-10-31",
+  "scope": "Focused sample; no vehicle qualification",
+  "sources": [
+    {
+      "repository": "https://github.com/yangwenbo99/Neo-MZD-AIO",
+      "commit": "9db2bc287e13e67d38b670fa6f62981f62c59184",
+      "evidence": "Standalone CLI source reviewed; one real three-tweak assembly audit; six commits ahead of AIO baseline",
+      "decision": "Compiler candidate, not adopted wholesale; locked Sharp dependency has advisories"
+    },
+    {
+      "repository": "https://github.com/Austin-Metke/MZD-AIO",
+      "commit": "67788a600cb4b33b4e9a6adb1c562770bc53c2d3",
+      "evidence": "11 commits ahead; desktop/IPC/resource-handling change set reviewed as leads",
+      "decision": "Inspect and test modernization independently before reuse"
+    },
+    {
+      "repository": "https://github.com/Miatafy/TouchTune",
+      "commit": "6061a6c98eeb1c348773ec4b2fd29eef3b39441e",
+      "evidence": "Source plus author-reported scoped bench results inspected",
+      "decision": "Transaction/attribute/filename lessons; no independent hardware reproduction"
+    },
+    {
+      "repository": "https://github.com/KidMixer/mazda-carplay-hud",
+      "commit": "9782e927ca7a3e1715585cbafdb6417833944506",
+      "evidence": "Read README, install/uninstall and USB wrapper",
+      "decision": "Factory-projection/HUD research; no binary built; blanket safety claim unverified"
+    },
+    {
+      "repository": "https://github.com/VitaliyKurokhtin/oem-aa-mod",
+      "commit": "f8ac5b02fd7bb85e208288cc804931cba19a2936",
+      "evidence": "README and metadata lead",
+      "decision": "Separate factory Android Auto/native-shim research candidate"
+    },
+    {
+      "repository": "https://github.com/Trevelopment/cmu-autorun",
+      "commit": "66e4efe1db202009dd91f1904662cab030f3f558",
+      "evidence": "README/metadata recovery prerequisites",
+      "decision": "Access recovery is not a universal brick recovery guarantee"
+    },
+    {
+      "repository": "https://github.com/gartnera/headunit",
+      "commit": "1cfb398d5b81bbc586dd11f111aa40bc0a1edb88",
+      "evidence": "Installer source search and repository metadata",
+      "decision": "Historical headunit lineage; not modern-phone qualification"
+    },
+    {
+      "repository": "https://github.com/bencroskery/MZD-WEB",
+      "commit": "35c277d5821769991d958f71bc4e0d63c2fae570",
+      "evidence": "README/metadata inspected",
+      "decision": "Visual-fixture candidate requiring user JCI backup and old-browser limitations"
+    },
+    {
+      "repository": "https://github.com/silverchris/mazda-cmu-documentation",
+      "commit": "838b1a46153adbd8b5c86d167ad52e724e39e956",
+      "evidence": "Community hardware notes/metadata inspected",
+      "decision": "Architecture reference only; no wiring or qualification claims"
+    },
+    {
+      "repository": "https://github.com/kushagharahi/mazda-hu-v74-tweaks",
+      "commit": "e48716e9789f989d07d318b9220918c42a4c616d",
+      "evidence": "SPI recovery documentation only; no firmware/flash dump downloaded",
+      "decision": "Specialist recovery lead; no instructions adopted"
+    },
+    {
+      "repository": "https://github.com/lmagder/m3-toolchain",
+      "commit": "61ec0343de84f6fc7c46840056df1d600d44be8a",
+      "evidence": "Referenced by native-mod projects; metadata checked",
+      "decision": "Toolchain/ABI lead; not downloaded or run"
+    },
+    {
+      "repository": "https://github.com/balena-io-modules/drivelist",
+      "commit": "a616aa9875956ecf1a546cf1d2480ff281e54d2b",
+      "evidence": "Source interface/README metadata inspected",
+      "decision": "Future native discovery candidate; nullable fields and device identity remain concerns"
+    },
+    {
+      "repository": "https://github.com/balena-io-modules/etcher-sdk",
+      "commit": "9e6127e6c01bbeeb3342046176e1dd3001ed1d13",
+      "evidence": "README/source-tree metadata inspected",
+      "decision": "Block-image writer candidate; not automatically a FAT32 file-tree preparer"
+    },
+    {
+      "repository": "https://github.com/rnprojekt/MZD-AIO-TI-X",
+      "commit": "5f37a27ae3c869a1cdaedcc51fd18ab02cfb8c33",
+      "evidence": "Old fork metadata/README inspected",
+      "decision": "Historical reference; 2017 last push does not imply current maintenance"
+    },
+    {
+      "repository": "https://github.com/herasymchyk-oleksii/MZD-AIO",
+      "commit": "409c724ed860497b2a34f9367cb4a019287846ea",
+      "evidence": "GitHub compare returned identical master branch",
+      "decision": "Recent push metadata is not evidence of functional changes"
+    },
+    {
+      "repository": "https://github.com/n3k0lai/MZD-AIO",
+      "commit": "409c724ed860497b2a34f9367cb4a019287846ea",
+      "evidence": "GitHub compare returned identical master branch",
+      "decision": "Recent push metadata is not evidence of functional changes"
+    }
+  ]
+}
