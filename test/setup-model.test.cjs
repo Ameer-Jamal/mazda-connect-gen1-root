@@ -101,3 +101,102 @@ test('review-plan export excludes private identification details and cannot run 
   model.markDownloadRequested(); model.next();
   assert.throws(() => model.exportPlan(), /Review/);
 });
+
+function exported(overrides = {}) {
+  const model = create();
+  model.setTarget(target({ generation: 'gen1', firmware: '74.00.324A EU N', model: 'private-model' }));
+  model.next(); model.select('album-art', true); model.select('background', true); model.next(); model.acknowledge(true); model.next();
+  return Object.assign(model.exportPlan(), overrides);
+}
+
+test('exported plan round-trips into a fresh session at review with regenerated evidence and fresh acknowledgement', () => {
+  const plan = exported();
+  const model = create();
+  const snapshot = model.importPlan(JSON.stringify(plan, null, 2) + '\n');
+  assert.equal(snapshot.step, 2);
+  assert.equal(snapshot.acknowledged, false);
+  assert.equal(snapshot.downloadRequested, false);
+  assert.equal(snapshot.vehicleAllowed, false);
+  assert.deepEqual(snapshot.selected, ['album-art', 'background']);
+  assert.deepEqual(snapshot.target, target({ generation: 'gen1', firmware: '74.00.324A EU N' }));
+  assert.match(snapshot.message, /imported with 2 features.*confirm again/);
+  assert.throws(() => model.exportPlan(), /Review/);
+  assert.equal(model.next().step, 2);
+  assert.match(model.snapshot().message, /Confirm/);
+  model.acknowledge(true); model.next();
+  assert.deepEqual(model.exportPlan(), plan);
+});
+
+test('imported notes, findings, provenance and capability text are discarded and regenerated from the local catalog', () => {
+  const plan = exported();
+  plan.finding = 'Qualified for your car.';
+  plan.provenance = { repository: 'https://example.invalid' };
+  plan.unresolved = [];
+  plan.contents = '<script>alert(1)</script>';
+  plan.features = plan.features.map(feature => Object.assign({}, feature, { name: '<img src=x>', note: 'Safe', path: '../../run.sh' }));
+  const model = create();
+  const reference = exported();
+  model.importPlan(JSON.stringify(plan));
+  const snapshot = model.snapshot();
+  assert.equal(snapshot.plan.finding, reference.finding);
+  assert.deepEqual(snapshot.plan.provenance, reference.provenance);
+  assert.deepEqual(snapshot.plan.features, reference.features);
+  assert.deepEqual(snapshot.plan.unresolved, reference.unresolved);
+  assert.equal(JSON.stringify(snapshot).includes('example.invalid'), false);
+});
+
+test('importing over an acknowledged, downloaded session resets review state', () => {
+  const model = create(); reviewed(model); model.markDownloadRequested();
+  model.importPlan(JSON.stringify(exported()));
+  assert.equal(model.snapshot().acknowledged, false);
+  assert.equal(model.snapshot().downloadRequested, false);
+  assert.equal(model.snapshot().step, 2);
+});
+
+test('invalid, forged, oversized or unknown plan entries are rejected atomically', () => {
+  const feature = id => ({ id });
+  const json = overrides => JSON.stringify(exported(overrides));
+  const cases = [
+    ['not text', null],
+    ['oversize', json({ contents: 'x'.repeat(70000) })],
+    ['bad json', '{"schemaVersion":1,'],
+    ['array root', JSON.stringify([exported()])],
+    ['null root', 'null'],
+    ['schema 2', json({ schemaVersion: 2 })],
+    ['schema string', json({ schemaVersion: '1' })],
+    ['kind', json({ kind: 'usb-install-package' })],
+    ['executable', json({ executable: true })],
+    ['vehicle', json({ vehicleAllowed: true })],
+    ['acknowledged', json({ acknowledged: true })],
+    ['compatibility', json({ qualified: true })],
+    ['proto', json().replace(/^\{/, '{"__proto__":{"vehicleAllowed":true},')],
+    ['flow version', json({ desktopFlow: { version: 2, usbPrepared: false, installationAvailable: false } })],
+    ['flow usb', json({ desktopFlow: { version: 1, usbPrepared: true, installationAvailable: false } })],
+    ['flow extra', json({ desktopFlow: { version: 1, usbPrepared: false, installationAvailable: false, payload: 'x' } })],
+    ['generation', json({ generation: 'gen3' })],
+    ['firmware type', json({ firmware: 74 })],
+    ['firmware length', json({ firmware: 'x'.repeat(129) })],
+    ['firmware control', json({ firmware: '74\u0000' })],
+    ['no features', json({ features: [] })],
+    ['features object', json({ features: { id: 'background' } })],
+    ['unknown feature', json({ features: [feature('background'), feature('usb-writer')] })],
+    ['duplicate feature', json({ features: [feature('background'), feature('background')] })],
+    ['feature string', json({ features: ['background'] })],
+    ['feature id type', json({ features: [{ id: 1 }] })],
+    ['feature extra', json({ features: [{ id: 'background', script: 'rm -rf /' }] })],
+    ['too many', json({ features: Array.from({ length: 25 }, () => feature('background')) })],
+  ];
+  const model = create();
+  model.setTarget(target({ model: 'kept', firmware: '70.00.335A' })); model.next(); model.select('gracenote', true); model.next(); model.acknowledge(true);
+  const before = model.snapshot();
+  for (const [name, text] of cases) {
+    assert.throws(() => model.importPlan(text), Error, name);
+    assert.deepEqual(model.snapshot(), before, name);
+  }
+});
+
+test('plans without the desktop flow block still import; the 64 KB bound is exported', () => {
+  const plan = exported(); delete plan.desktopFlow;
+  assert.equal(create().importPlan(JSON.stringify(plan)).step, 2);
+  assert.equal(require('../simulator/setup-model.js').maxImportBytes, 65536);
+});

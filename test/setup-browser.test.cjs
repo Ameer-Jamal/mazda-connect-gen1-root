@@ -156,6 +156,65 @@ test('Gen 2, no results, narrow layout and download failure remain usable withou
   assert.equal(await page.getByRole('heading', { name: 'Review what you picked.' }).isVisible(), true);
 });
 
+test('extracted archive imports a downloaded plan, requires fresh review and re-exports identically', async t => {
+  const first = await pageFor(t, { offline: true });
+  await first.getByLabel('Infotainment generation', { exact: true }).selectOption('gen1');
+  await first.getByLabel('Full OS version', { exact: true }).fill('74.00.324A EU N');
+  await toSave(first);
+  const event = first.waitForEvent('download');
+  await first.getByRole('button', { name: 'Download review plan (.json)' }).click();
+  const saved = await (await event).path();
+  const original = JSON.parse(fs.readFileSync(saved, 'utf8'));
+
+  const page = await pageFor(t, { offline: true });
+  const status = page.getByRole('status', { name: 'Setup status' });
+  const input = page.getByLabel('Resume from a saved review plan (.json)', { exact: true });
+  await page.getByLabel('Model and trim', { exact: true }).fill('kept-model');
+  const invalid = [
+    ['unknown.json', JSON.stringify(Object.assign({}, original, { features: [{ id: 'usb-writer' }] })), /unknown feature/],
+    ['forged.json', JSON.stringify(Object.assign({}, original, { vehicleAllowed: true })), /capabilities/],
+    ['ack.json', JSON.stringify(Object.assign({}, original, { acknowledged: true })), /unexpected fields/],
+    ['broken.json', '{', /not valid JSON/],
+    ['huge.json', ' '.repeat(65537), /larger than 64 KB/],
+  ];
+  for (const [name, text, expected] of invalid) {
+    await input.setInputFiles({ name, mimeType: 'application/json', buffer: Buffer.from(text) });
+    await status.filter({ hasText: expected }).waitFor();
+    assert.match(await status.innerText(), /not changed/);
+    assert.equal(await page.getByRole('heading', { name: 'Which system do you have?' }).isVisible(), true);
+    assert.equal(await input.evaluate(el => el === document.activeElement && el.value === ''), true);
+    assert.equal(await page.getByLabel('Model and trim', { exact: true }).inputValue(), 'kept-model');
+  }
+  await next(page);
+  assert.match(await page.getByRole('status', { name: 'Selected tweaks' }).innerText(), /^0 selected/);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+
+  const tampered = Object.assign({}, original, { finding: 'Qualified for your car.' });
+  tampered.features = original.features.map(feature => Object.assign({}, feature, { note: '<img src=x onerror=alert(1)>' }));
+  await input.setInputFiles({ name: 'plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(tampered)) });
+  const review = page.getByRole('heading', { name: 'Review what you picked.' });
+  await review.waitFor();
+  assert.equal(await review.evaluate(el => el === document.activeElement), true);
+  assert.match(await status.innerText(), /imported with 1 feature.*confirm again/);
+  assert.match(await page.locator('#setup-finding').innerText(), /bypass/);
+  assert.equal(await page.locator('#setup-selected').innerText().then(text => text.includes('<img')), false);
+  assert.equal(await page.locator('#setup-selected img').count(), 0);
+  assert.match(await page.locator('#setup-summary').innerText(), /74\.00\.324A EU N/);
+  assert.equal(await page.locator('#setup-ack').isChecked(), false);
+  await page.getByRole('button', { name: 'Continue to plan download' }).click();
+  assert.match(await status.innerText(), /Confirm/);
+
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  assert.equal(await page.getByRole('checkbox', { name: 'Album art layout / hide art', exact: true }).isChecked(), true);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  assert.equal(await page.getByLabel('Full OS version', { exact: true }).inputValue(), '74.00.324A EU N');
+  assert.equal(await page.getByLabel('Model and trim', { exact: true }).inputValue(), '');
+  await next(page); await next(page);
+  await page.getByRole('checkbox', { name: 'I understand the download is a review plan, not software to put in the car.' }).check();
+  await page.getByRole('button', { name: 'Continue to plan download' }).click();
+  assert.deepEqual(await downloadPlan(page), original);
+});
+
 test('extracted archive runs offline from file URL, exports a plan and opens its mock research tools', async t => {
   const page = await pageFor(t, { offline: true });
   await toSave(page);

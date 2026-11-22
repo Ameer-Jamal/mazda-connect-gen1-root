@@ -38,6 +38,11 @@
             <label>Vehicle market<input id="setup-market" maxlength="128" placeholder="Where the vehicle was sold"></label>
           </div>
         </form>
+        <div class="setup-import">
+          <label for="setup-import">Resume from a saved review plan (.json)</label>
+          <input id="setup-import" type="file" accept=".json,application/json" aria-describedby="setup-import-help">
+          <p id="setup-import-help" class="fine">The file is read on this computer only, as data, up to 64 KB. Its features must match this version's catalog. Notes, findings and confirmations are not trusted; they are regenerated here and you confirm the review again. Importing replaces this page's entries, including the details above.</p>
+        </div>
         <details><summary>What if I don't know the generation?</summary><p>Model year and screen size alone do not prove the generation or compatibility. Leave “Not sure yet” selected. Gen 2 is unsupported by the evidence reviewed here. Do not remove any hardware to complete this form.</p></details>
         <p class="fine">Everything stays in this page until you explicitly export. No VIN, account, hardware removal or USB insertion is needed. Reloading clears the session.</p>
       </section>

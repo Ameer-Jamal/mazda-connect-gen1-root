@@ -8,6 +8,8 @@ It cannot prepare, format, write or discover a USB drive.
    Firefox and Safari have not been verified.
 3. Follow Identify > Choose > Review > Save plan.
 4. Save the JSON review plan on your computer if you want to keep it.
+   To resume later, choose the saved file on the Identify step. It is read
+   locally as data only; findings are regenerated and you confirm again.
 
 No Node.js, installation, server, account or internet connection is required
 for the extracted desktop preview. External source links require internet
