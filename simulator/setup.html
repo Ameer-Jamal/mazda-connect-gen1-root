@@ -33,7 +33,7 @@
             <div><label for="setup-generation">Infotainment generation</label><select id="setup-generation"><option value="unknown">Not sure yet</option><option value="gen1">Gen 1 / MZD Connect</option><option value="gen2">Gen 2</option></select></div>
             <label>Model and trim<input id="setup-model" maxlength="128" placeholder="For example: MX-5 Miata GT"></label>
             <label>Model year<input id="setup-year" inputmode="numeric" maxlength="4" placeholder="For example: 2022"></label>
-            <label>Full OS version<input id="setup-firmware" maxlength="128" placeholder="Copy the entire displayed version"></label>
+            <div><label>Full OS version<input id="setup-firmware" maxlength="128" value="74.00.230 NA N" placeholder="Copy the entire displayed version" aria-describedby="setup-firmware-help"></label><p id="setup-firmware-help" class="fine">Prefilled from a 2022 MX-5 GT. Compare it with Settings → System → About → Version Information. Replace it with the entire OS version shown, or clear it if you’re unsure.</p></div>
             <label>Firmware region<input id="setup-region" maxlength="128" placeholder="Copy it if shown; do not guess"></label>
             <label>Vehicle market<input id="setup-market" maxlength="128" placeholder="Where the vehicle was sold"></label>
           </div>
