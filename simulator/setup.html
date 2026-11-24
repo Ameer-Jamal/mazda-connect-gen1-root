@@ -33,11 +33,16 @@
             <div><label for="setup-generation">Infotainment generation</label><select id="setup-generation"><option value="unknown">Not sure yet</option><option value="gen1">Gen 1 / MZD Connect</option><option value="gen2">Gen 2</option></select></div>
             <label>Model and trim<input id="setup-model" maxlength="128" placeholder="For example: MX-5 Miata GT"></label>
             <label>Model year<input id="setup-year" inputmode="numeric" maxlength="4" placeholder="For example: 2022"></label>
-            <label>Full OS version<input id="setup-firmware" maxlength="128" placeholder="Copy the entire displayed version"></label>
+            <div><label>Full OS version<input id="setup-firmware" maxlength="128" value="74.00.230 NA N" placeholder="Copy the entire displayed version" aria-describedby="setup-firmware-help"></label><p id="setup-firmware-help" class="fine">Prefilled from a 2022 MX-5 GT. Compare it with Settings → System → About → Version Information. Replace it with the entire OS version shown, or clear it if you’re unsure.</p></div>
             <label>Firmware region<input id="setup-region" maxlength="128" placeholder="Copy it if shown; do not guess"></label>
             <label>Vehicle market<input id="setup-market" maxlength="128" placeholder="Where the vehicle was sold"></label>
           </div>
         </form>
+        <div class="setup-import">
+          <label for="setup-import">Resume from a saved review plan (.json)</label>
+          <input id="setup-import" type="file" accept=".json,application/json" aria-describedby="setup-import-help">
+          <p id="setup-import-help" class="fine">The file is read on this computer only, as data, up to 64 KB. Its features must match this version's catalog. Notes, findings and confirmations are not trusted; they are regenerated here and you confirm the review again. Importing replaces this page's entries, including the details above.</p>
+        </div>
         <details><summary>What if I don't know the generation?</summary><p>Model year and screen size alone do not prove the generation or compatibility. Leave “Not sure yet” selected. Gen 2 is unsupported by the evidence reviewed here. Do not remove any hardware to complete this form.</p></details>
         <p class="fine">Everything stays in this page until you explicitly export. No VIN, account, hardware removal or USB insertion is needed. Reloading clears the session.</p>
       </section>
@@ -66,6 +71,11 @@
         <p class="eyebrow">REMAINING INSTALLER STAGES</p><h2 id="remaining-title" tabindex="-1">Your plan is the current stopping point.</h2>
         <div class="remaining-stage"><h3>5 · Prepare the USB</h3><strong>Unavailable</strong><p>The planned installer will identify a selected removable drive, confirm before erasing it, assemble qualified feature packages and verify the copied files. This alpha does none of those operations.</p></div>
         <div class="remaining-stage"><h3>6 · Follow the in-car guide</h3><strong>Unavailable</strong><p>Instructions must match an exact, bench-qualified package and include expected results and recovery steps. No configuration has been qualified here, so this release provides no installation procedure.</p></div>
+        <div class="remaining-stage">
+          <h3>Mazda music database updates</h3>
+          <p>Mazda documents a separate USB update for Gracenote on the 2022 MX-5. It updates music recognition data. Ask Mazda to confirm the correct package for your region before preparing a USB drive.</p>
+          <p><a href="https://www.mazdausa.com/static/manuals/2022/mx-5/contents/06110206.html" target="_blank" rel="noopener noreferrer">Read the Mazda owner’s manual</a></p>
+        </div>
         <p>You can return to edit your selections or explore the desktop research tools. The selected plan and a successful desktop test do not establish vehicle compatibility.</p>
       </section>
       <div class="setup-controls"><button id="setup-back" type="button">Back</button><button id="setup-next" type="button" class="primary">Continue</button></div>

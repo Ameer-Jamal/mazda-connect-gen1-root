@@ -13,6 +13,11 @@
         fields.forEach(function (field) { target[field] = document.getElementById('setup-' + field).value; });
         return target;
     }
+    var importInput = document.getElementById('setup-import');
+    var importToken = 0;
+    function writeTarget(target) {
+        fields.forEach(function (field) { document.getElementById('setup-' + field).value = target[field]; });
+    }
     function choices() {
         var selected = model.snapshot().selected;
         var query = search.value.trim().toLowerCase();
@@ -94,6 +99,10 @@
         review(snapshot);
         if (changed && snapshot.step === 1) { choices(); }
         if (changed && lastStep !== -1) { document.getElementById(titles[snapshot.step]).focus(); }
+        if (changed && lastStep === 0) {
+            importToken += 1;
+            importInput.value = '';
+        }
         lastStep = snapshot.step;
     }
     document.getElementById('setup-target').addEventListener('submit', function (event) { event.preventDefault(); });
@@ -107,6 +116,29 @@
     search.addEventListener('input', choices);
     category.addEventListener('change', choices);
     document.getElementById('setup-ack').addEventListener('change', function () { model.acknowledge(this.checked); render(); });
+    function importFailed(error) {
+        document.getElementById('setup-message').textContent = 'Could not import plan: ' + error.message + ' Your current entries were not changed.';
+        importInput.value = '';
+        importInput.focus();
+    }
+    importInput.addEventListener('change', function () {
+        var file = importInput.files && importInput.files[0];
+        var token = importToken += 1;
+        if (!file) { return; }
+        if (file.size > ConnectLabSetup.maxImportBytes) { importFailed(new Error('Plan file is larger than 64 KB.')); return; }
+        if (typeof window.FileReader !== 'function') { importFailed(new Error('This browser cannot read local files. Use a current desktop browser.')); return; }
+        var reader = new FileReader();
+        reader.onload = function () {
+            if (token !== importToken) { return; }
+            try {
+                writeTarget(model.importPlan(reader.result).target);
+                importInput.value = '';
+                render();
+            } catch (error) { importFailed(error); }
+        };
+        reader.onerror = function () { if (token === importToken) { importFailed(new Error('The plan file could not be read.')); } };
+        try { reader.readAsText(file); } catch (error) { importFailed(error); }
+    });
     document.getElementById('setup-download').addEventListener('click', function () {
         var url;
         var link;

@@ -29,6 +29,9 @@
 .remaining-stage { padding: 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 5px; margin: 1rem 0; }
 .remaining-stage h3 { margin: 0; font-size: 1.1rem; }
 .remaining-stage strong { color: #785414; font-size: .85rem; }
+.setup-import { padding: 1rem; border: 1px dashed var(--line); border-radius: 5px; margin: 1rem 0; }
+.setup-import label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .4rem; }
+.setup-import input { max-width: 100%; font: inherit; }
 .setup-panel details { margin-top: 1rem; }
 .setup-panel summary { cursor: pointer; }
 @media (max-width: 760px) { .setup-progress { grid-template-columns: repeat(3, minmax(0, 1fr)); } .setup-panel { padding: 1.2rem; } .setup-fields { grid-template-columns: 1fr; } .setup-summary { grid-template-columns: 1fr; } .setup-summary dt { border: 0; padding-bottom: 0; } }
